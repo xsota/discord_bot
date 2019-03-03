@@ -2,7 +2,7 @@ import discord
 import random
 import os
 
-DSCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
+DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 
 client = discord.Client()
 
