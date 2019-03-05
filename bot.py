@@ -32,10 +32,12 @@ async def on_voice_state_update(before_member, after_member):
 
   channel = channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
 
+  name = after_member.name if after_member.nick is None else after_member.nick
+
   if after_member.voice.voice_channel is None:
-    await client.send_message(channel, '誰かが通話から出たよ')
+    await client.send_message(channel, name + 'が通話から出たよ')
   else:
-    await client.send_message(channel, '誰かが通話に入ったよ')
+    await client.send_message(channel, name + 'が通話に入ったよ')
 
 
 client.run(DISCORD_TOKEN)
