@@ -23,5 +23,19 @@ async def on_message(message):
     reply = game + 'とかどうですか？'
     await client.send_message(message.channel, reply)
 
+@client.event
+async def on_voice_state_update(before_member, after_member):
+  if before_member.voice.voice_channel == after_member.voice.voice_channel:
+    return
+
+  server = before_member.voice.voice_channel.server if after_member.voice.voice_channel is None else after_member.voice.voice_channel.server
+
+  channel = channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
+
+  if after_member.voice.voice_channel is None:
+    await client.send_message(channel, '誰かが通話から出たよ')
+  else:
+    await client.send_message(channel, '誰かが通話に入ったよ')
+
 
 client.run(DISCORD_TOKEN)
