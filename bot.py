@@ -37,7 +37,7 @@ async def on_voice_state_update(before_member, after_member):
   if after_member.voice.voice_channel is None:
     await client.send_message(channel, name + 'が通話から出たよ')
   else:
-    await client.send_message(channel, name + 'が通話に入ったよ')
+    await client.send_message(channel, name + 'が' + after_member.voice.voice_channel.name + 'に入ったよ')
 
 
 client.run(DISCORD_TOKEN)
