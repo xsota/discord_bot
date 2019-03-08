@@ -30,7 +30,7 @@ def register():
   appId = r.json()['appId']
   return appId
 
-def getReply(appId, utt_content):
+def getReply(appId, utt_content, member):
   url = 'https://api.apigw.smt.docomo.ne.jp/naturalChatting/v1/dialogue?APIKEY=' + DOCOMO_ZATUDAN_TOKEN
   payload = {
     'language': 'ja-JP',
@@ -41,6 +41,7 @@ def getReply(appId, utt_content):
     'appSendTime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
     'clientData': {
       'option': {
+        'nickname': getUserNickName(member),
         'sex':'女',
       }
     }
@@ -72,7 +73,7 @@ async def on_message(message):
 
   if client.user.id in message.content or random.randint(1,6) == 6:
     text = message.content.replace('<@'+client.user.id+'>', '')
-    reply = getReply(appId, text)
+    reply = getReply(appId, text, message.author)
 
     await client.send_message(message.channel, reply)
 
