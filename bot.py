@@ -28,7 +28,7 @@ async def on_message(message):
     await client.send_message(message.channel, reply)
     return
 
-  if random.randint(1,6) == 6:
+  if client.user.id in message.content or random.randint(1,6) == 6:
     result = talkClient.talk(message.content)
     await client.send_message(message.channel, result['results'][0]['reply'])
 
