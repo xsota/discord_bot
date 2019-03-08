@@ -16,6 +16,8 @@ headers = {'Content-type': 'application/json'}
 
 appId = None
 
+def getUserNickName(member):
+  return member.name if member.nick is None else member.nick
 
 def register():
   url = 'https://api.apigw.smt.docomo.ne.jp/naturalChatting/v1/registration?APIKEY=' + DOCOMO_ZATUDAN_TOKEN
@@ -83,7 +85,7 @@ async def on_voice_state_update(before_member, after_member):
 
   channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
 
-  name = after_member.name if after_member.nick is None else after_member.nick
+  name = getUserNickName(after_member)
 
   if after_member.voice.voice_channel is None:
     await client.send_message(channel, name + 'が通話から出たよ')
