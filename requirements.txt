@@ -1,4 +1,3 @@
-pya3rt
 requests
 aiohttp==1.0.5
 async-timeout==3.0.1

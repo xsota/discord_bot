@@ -3,19 +3,59 @@ import random
 import os
 import requests
 import json
-import pya3rt
+from _datetime import datetime
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 GAME_GATYA_API_URL = os.environ.get('GAME_GATYA_API_URL')
 TALK_API_TOKEN = os.environ.get('TALK_API_TOKEN')
+DOCOMO_ZATUDAN_TOKEN = os.environ.get('DOCOMO_ZATUDAN_TOKEN')
 
 client = discord.Client()
-talkClient = pya3rt.TalkClient(TALK_API_TOKEN)
+
+headers = {'Content-type': 'application/json'}
+
+appId = None
+
+
+def register():
+  url = 'https://api.apigw.smt.docomo.ne.jp/naturalChatting/v1/registration?APIKEY=' + DOCOMO_ZATUDAN_TOKEN
+
+  pay = {
+    'botId': 'Chatting',
+    'appKind': 'unko'
+  }
+  r = requests.post(url, data=json.dumps(pay), headers=headers)
+  appId = r.json()['appId']
+  return appId
+
+def getReply(appId, utt_content):
+  url = 'https://api.apigw.smt.docomo.ne.jp/naturalChatting/v1/dialogue?APIKEY=' + DOCOMO_ZATUDAN_TOKEN
+  payload = {
+    'language': 'ja-JP',
+    'botId': 'Chatting',
+    'appId': appId,
+    'voiceText': utt_content,
+    'appRecvTime': '2011-01-11 22:22:22',
+    'appSendTime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+    'clientData': {
+      'option': {
+        'sex':'女',
+      }
+    }
+  }
+  result = requests.post(url, data=json.dumps(payload), headers=headers)
+  data = result.json()
+  response = data['systemText']['expression']
+
+  print('response: %s' % response)
+  return response
 
 
 @client.event
 async def on_ready():
   print('ログイン')
+  global appId
+  appId = register() #とりあえず共通にしとくけどするけどいつかサーバ毎で分けたい
 
 @client.event
 async def on_message(message):
@@ -30,10 +70,9 @@ async def on_message(message):
 
   if client.user.id in message.content or random.randint(1,6) == 6:
     text = message.content.replace('<@'+client.user.id+'>', '')
-    result = talkClient.talk(text)
-    print(text)
-    await client.send_message(message.channel, result['results'][0]['reply'])
+    reply = getReply(appId, text)
 
+    await client.send_message(message.channel, reply)
 
 @client.event
 async def on_voice_state_update(before_member, after_member):
