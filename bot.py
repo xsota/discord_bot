@@ -81,7 +81,7 @@ async def on_voice_state_update(before_member, after_member):
 
   server = before_member.voice.voice_channel.server if after_member.voice.voice_channel is None else after_member.voice.voice_channel.server
 
-  channel = channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
+  channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
 
   name = after_member.name if after_member.nick is None else after_member.nick
 
