@@ -2,11 +2,15 @@ import discord
 import random
 import os
 import requests
+import json
+import pya3rt
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 GAME_GATYA_API_URL = os.environ.get('GAME_GATYA_API_URL')
+TALK_API_TOKEN = os.environ.get('TALK_API_TOKEN')
 
 client = discord.Client()
+talkClient = pya3rt.TalkClient(TALK_API_TOKEN)
 
 
 @client.event
@@ -22,6 +26,12 @@ async def on_message(message):
     game = requests.get(GAME_GATYA_API_URL).text
     reply = game + 'とかどうですか？'
     await client.send_message(message.channel, reply)
+    return
+
+  if random.randint(1,6) == 6:
+    result = talkClient.talk(message.content)
+    await client.send_message(message.channel, result['results'][0]['reply'])
+
 
 @client.event
 async def on_voice_state_update(before_member, after_member):
