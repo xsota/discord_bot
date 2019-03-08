@@ -29,7 +29,9 @@ async def on_message(message):
     return
 
   if client.user.id in message.content or random.randint(1,6) == 6:
-    result = talkClient.talk(message.content)
+    text = message.content.replace('<@'+client.user.id+'>', '')
+    result = talkClient.talk(text)
+    print(text)
     await client.send_message(message.channel, result['results'][0]['reply'])
 
 
