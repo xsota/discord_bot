@@ -56,20 +56,20 @@ async def on_message(message):
 
 
 @client.event
-async def on_voice_state_update(before_member, after_member):
-  if before_member.voice.voice_channel == after_member.voice.voice_channel:
+async def on_voice_state_update(member, before, after):
+  if before == after:
     return
 
-  server = before_member.voice.voice_channel.server if after_member.voice.voice_channel is None else after_member.voice.voice_channel.server
+  server = before.channel.guild if after.channel is None else after.channel.guild
 
   channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
 
-  name = getUserNickName(after_member)
+  name = getUserNickName(member)
 
-  if after_member.voice.voice_channel is None:
-    await client.send_message(channel, name + 'が通話からきえてく・・・')
+  if after.channel is None:
+    await channel.send(name + 'が通話からきえてく・・・')
   else:
-    await client.send_message(channel, name + 'が' + after_member.voice.voice_channel.name + 'に入ったよ')
+    await channel.send(name + 'が' + after.channel.name + 'に入ったよ')
 
 
 client.run(DISCORD_TOKEN)
