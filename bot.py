@@ -16,11 +16,13 @@ headers = {'Content-type': 'application/json'}
 
 appId = None
 
+
 def getUserNickName(member):
   return member.name if member.nick is None else member.nick
 
+
 def getReply(text):
-  url = 'https://chatbot-api.userlocal.jp/api/chat?message=' + text +'&key=' + ZATUDAN_TOKEN
+  url = 'https://chatbot-api.userlocal.jp/api/chat?message=' + text + '&key=' + ZATUDAN_TOKEN
   result = requests.get(url)
   data = result.json()
   response = data['result']
@@ -34,6 +36,7 @@ def getReply(text):
 async def on_ready():
   print('ログイン')
 
+
 @client.event
 async def on_message(message):
   if message.author == client.user or message.content.startswith('http'):
@@ -45,11 +48,12 @@ async def on_message(message):
     await client.send_message(message.channel, reply)
     return
 
-  if client.user.id in message.content or random.randint(1,6) == 6:
-    text = message.content.replace('<@'+client.user.id+'>', '')
+  if client.user.id in message.content or random.randint(1, 6) == 6:
+    text = message.content.replace('<@' + client.user.id + '>', '')
     reply = getReply(text)
 
     await client.send_message(message.channel, reply)
+
 
 @client.event
 async def on_voice_state_update(before_member, after_member):
