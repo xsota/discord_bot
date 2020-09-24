@@ -1,8 +1,8 @@
 requests
-aiohttp==1.0.5
+aiohttp==3.6.0
 async-timeout==3.0.1
 certifi==2018.11.29
 chardet==3.0.4
-discord.py==0.16.12
+discord.py==1.4.1
 multidict==4.5.2
 websockets==3.4
