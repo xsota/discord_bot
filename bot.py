@@ -2,6 +2,7 @@ import discord
 import random
 import os
 import requests
+import re
 import json
 from _datetime import datetime
 
@@ -40,6 +41,16 @@ async def on_ready():
 @client.event
 async def on_message(message):
   if message.author == client.user or message.content.startswith('http'):
+    return
+
+
+  yatte = re.match(r'(.*)やって$', message.content)
+  if yatte:
+    async with message.channel.typing():
+      play = yatte.group(1)
+      await client.change_presence(activity=discord.Game(name=play))
+
+    await message.channel.send(play + 'をプレイするよ')
     return
 
   if message.content.startswith('ゲームガチャ'):
