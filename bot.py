@@ -45,12 +45,14 @@ async def on_message(message):
   if message.content.startswith('ゲームガチャ'):
     game = requests.get(GAME_GATYA_API_URL).text
     reply = game + 'とかどうですか？'
-    await message.channel.send(reply)
+    async with message.channel.typing():
+      await message.channel.send(reply)
     return
 
   if str(client.user.id) in message.content or random.randint(1, 6) == 6:
-    text = message.content.replace('<@' + str(client.user.id) + '>', '')
-    reply = getReply(text)
+    async with message.channel.typing():
+      text = message.content.replace('<@' + str(client.user.id) + '>', '')
+      reply = getReply(text)
 
     await message.channel.send(reply)
 
@@ -67,9 +69,11 @@ async def on_voice_state_update(member, before, after):
   name = getUserNickName(member)
 
   if after.channel is None:
-    await channel.send(name + 'が通話からきえてく・・・')
+    async with channel.typing():
+      await channel.send(name + 'が通話からきえてく・・・')
   else:
-    await channel.send(name + 'が' + after.channel.name + 'に入ったよ')
+    async with channel.typing():
+      await channel.send(name + 'が' + after.channel.name + 'に入ったよ')
 
 
 client.run(DISCORD_TOKEN)
