@@ -54,10 +54,11 @@ async def on_message(message):
     return
 
   if message.content.startswith('ゲームガチャ'):
-    game = requests.get(GAME_GATYA_API_URL).text
-    reply = game + 'とかどうですか？'
     async with message.channel.typing():
-      await message.channel.send(reply)
+      game = requests.get(GAME_GATYA_API_URL).text
+      reply = game + 'とかどうですか？'
+
+    await message.channel.send(reply)
     return
 
   if str(client.user.id) in message.content or random.randint(1, 6) == 6:
