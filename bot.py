@@ -71,7 +71,7 @@ async def on_message(message):
 
 @client.event
 async def on_voice_state_update(member, before, after):
-  if before == after:
+  if before.channel == after.channel:
     return
 
   server = before.channel.guild if after.channel is None else after.channel.guild
