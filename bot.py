@@ -3,9 +3,7 @@ import random
 import os
 import requests
 import re
-import ojichat
 import json
-
 from _datetime import datetime
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
@@ -76,7 +74,8 @@ async def on_message(message):
 
   if random.randint(1, 6) == 6:
     async with message.channel.typing():
-      reply = ojichat.generate(name=message.author.display_name, level=2)
+      text = message.content.replace('<@' + str(client.user.id) + '>', '')
+      reply = getReply(text)
       m = await message.channel.send(reply)
 
     await waitReply(m)
