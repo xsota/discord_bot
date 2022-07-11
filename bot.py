@@ -31,6 +31,21 @@ def getReply(text):
 
   return response
 
+async def replyTo(message):
+  async with message.channel.typing():
+    text = message.content.replace('<@' + str(client.user.id) + '>', '')
+    replyText = getReply(text)
+
+  replyMessage = await message.reply(replyText)
+
+  await waitReply(replyMessage)
+
+async def waitReply(message):
+  def check(m):
+    return m.reference is not None and m.reference.message_id == message.id
+
+  msg = await client.wait_for('message',  timeout=180.0, check=check)
+  await replyTo(msg)
 
 @client.event
 async def on_ready():
@@ -39,9 +54,10 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+  print(message.reference)
+
   if message.author == client.user or message.content.startswith('http'):
     return
-
 
   yatte = re.match(r'(.*)やって$', message.content)
   if yatte:
@@ -52,13 +68,17 @@ async def on_message(message):
     await message.channel.send(play + 'をプレイするよ')
     return
 
-  if str(client.user.id) in message.content or random.randint(1, 6) == 6:
+  if str(client.user.id) in message.content:
+    await replyTo(message)
+    return
+
+  if random.randint(1, 6) == 6:
     async with message.channel.typing():
       text = message.content.replace('<@' + str(client.user.id) + '>', '')
       reply = getReply(text)
+      m = await message.channel.send(reply)
 
-    await message.channel.send(reply)
-
+    await waitReply(m)
 
 @client.event
 async def on_voice_state_update(member, before, after):
