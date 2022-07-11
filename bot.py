@@ -7,7 +7,6 @@ import json
 from _datetime import datetime
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-GAME_GATYA_API_URL = os.environ.get('GAME_GATYA_API_URL')
 TALK_API_TOKEN = os.environ.get('TALK_API_TOKEN')
 ZATUDAN_TOKEN = os.environ.get('ZATUDAN_TOKEN')
 
@@ -51,14 +50,6 @@ async def on_message(message):
       await client.change_presence(activity=discord.Game(name=play))
 
     await message.channel.send(play + 'をプレイするよ')
-    return
-
-  if message.content.startswith('ゲームガチャ'):
-    async with message.channel.typing():
-      game = requests.get(GAME_GATYA_API_URL).text
-      reply = game + 'とかどうですか？'
-
-    await message.channel.send(reply)
     return
 
   if str(client.user.id) in message.content or random.randint(1, 6) == 6:
