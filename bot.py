@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix='$')
 headers = {'Content-type': 'application/json'}
 
 appId = None
-exchange = ccxt.bitfinex()
+exchange = ccxt.kraken()
 
 
 def getUserNickName(member):
@@ -113,9 +113,9 @@ async def price(ctx, symbol):
   await ctx.send(f'{symbol}の価格を調べるねっ')
 
   try:
-    ticker = exchange.fetch_ticker(f'{symbol}/USDT')
+    ticker = exchange.fetch_ticker(f'{symbol}/USD')
 
-    priceUSDT = (float(ticker['info']['ask']) + float(ticker['info']['bid'])) / 2
+    priceUSDT = (float(ticker['info']['a'][0]) + float(ticker['info']['b'][0])) / 2
 
     await ctx.send(f'{priceUSDT} USDくらい！')
 
