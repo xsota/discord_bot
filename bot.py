@@ -1,8 +1,11 @@
 import discord
+from discord.ext import commands
+
 import random
 import os
 import requests
 import re
+import ccxt
 import json
 from _datetime import datetime
 
@@ -10,11 +13,12 @@ DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 TALK_API_TOKEN = os.environ.get('TALK_API_TOKEN')
 ZATUDAN_TOKEN = os.environ.get('ZATUDAN_TOKEN')
 
-client = discord.Client()
+bot = commands.Bot(command_prefix='$')
 
 headers = {'Content-type': 'application/json'}
 
 appId = None
+exchange = ccxt.bitfinex()
 
 
 def getUserNickName(member):
@@ -33,7 +37,7 @@ def getReply(text):
 
 async def replyTo(message):
   async with message.channel.typing():
-    text = message.content.replace('<@' + str(client.user.id) + '>', '')
+    text = message.content.replace('<@' + str(bot.user.id) + '>', '')
     replyText = getReply(text)
 
   replyMessage = await message.reply(replyText)
@@ -44,41 +48,45 @@ async def waitReply(message):
   def check(m):
     return m.reference is not None and m.reference.message_id == message.id
 
-  msg = await client.wait_for('message',  timeout=180.0, check=check)
+  msg = await bot.wait_for('message',  timeout=180.0, check=check)
   await replyTo(msg)
 
-@client.event
+@bot.event
 async def on_ready():
   print('ログイン')
 
 
-@client.event
+@bot.event
 async def on_message(message):
-  if message.author == client.user or message.content.startswith('http'):
+  if message.content.startswith('$'):
+    await bot.process_commands(message)
+
+  if message.author == bot.user or message.content.startswith('http'):
     return
 
   yatte = re.match(r'(.*)やって$', message.content)
   if yatte:
     async with message.channel.typing():
       play = yatte.group(1)
-      await client.change_presence(activity=discord.Game(name=play))
+      await bot.change_presence(activity=discord.Game(name=play))
 
     await message.channel.send(play + 'をプレイするよ')
     return
 
-  if str(client.user.id) in message.content:
+  if str(bot.user.id) in message.content:
     await replyTo(message)
     return
 
   if random.randint(1, 6) == 6:
     async with message.channel.typing():
-      text = message.content.replace('<@' + str(client.user.id) + '>', '')
+      text = message.content.replace('<@' + str(bot.user.id) + '>', '')
       reply = getReply(text)
       m = await message.channel.send(reply)
 
     await waitReply(m)
 
-@client.event
+
+@bot.event
 async def on_voice_state_update(member, before, after):
   if before.channel == after.channel:
     return
@@ -96,5 +104,23 @@ async def on_voice_state_update(member, before, after):
     async with channel.typing():
       await channel.send(name + 'が' + after.channel.name + 'に入ったよ')
 
+@bot.command()
+async def add(ctx, a: int, b: int):
+  await ctx.send(a + b)
 
-client.run(DISCORD_TOKEN)
+@bot.command()
+async def price(ctx, symbol):
+  await ctx.send(f'{symbol}の価格を調べるねっ')
+
+  try:
+    ticker = exchange.fetch_ticker(f'{symbol}/USDT')
+
+    priceUSDT = (float(ticker['info']['ask']) + float(ticker['info']['bid'])) / 2
+
+    await ctx.send(f'{priceUSDT} USDくらい！')
+
+  except:
+    await ctx.send(f'{symbol}わかんない！')
+
+
+bot.run(DISCORD_TOKEN)
