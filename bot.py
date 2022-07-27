@@ -118,7 +118,7 @@ async def chart(ctx, symbol):
     index = 1
     ohlcv = exchange.fetch_ohlcv(f'{symbol}/USD', '1h')
     series = [x[index] for x in ohlcv]
-    chart = plot(series[-48:], {'height': 15})
+    chart = plot(series[-25:], {'height': 15})
 
     await ctx.send(f'```{chart}```')
 
