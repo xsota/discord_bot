@@ -8,6 +8,8 @@ import re
 import ccxt
 import json
 from _datetime import datetime
+from asciichart import plot
+
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 TALK_API_TOKEN = os.environ.get('TALK_API_TOKEN')
@@ -107,6 +109,21 @@ async def on_voice_state_update(member, before, after):
 @bot.command()
 async def add(ctx, a: int, b: int):
   await ctx.send(a + b)
+
+@bot.command()
+async def chart(ctx, symbol):
+  await ctx.send(f'{symbol}/USDの1時間足のチャートを調べるねっ')
+
+  try:
+    index = 1
+    ohlcv = exchange.fetch_ohlcv(f'{symbol}/USD', '1h')
+    series = [x[index] for x in ohlcv]
+    chart = plot(series[-48:], {'height': 15})
+
+    await ctx.send(f'```{chart}```')
+
+  except:
+    await ctx.send(f'わかんなかった！')
 
 @bot.command()
 async def price(ctx, symbol):
