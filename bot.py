@@ -12,7 +12,6 @@ from asciichart import plot
 
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-TALK_API_TOKEN = os.environ.get('TALK_API_TOKEN')
 ZATUDAN_TOKEN = os.environ.get('ZATUDAN_TOKEN')
 
 bot = commands.Bot(command_prefix='$')
