@@ -55,7 +55,9 @@ async def waitReply(message):
 @bot.event
 async def on_ready():
   print('ログイン')
-
+  print('Servers connected to:')
+  for server in bot.guilds:
+    print(server.name)
 
 @bot.event
 async def on_message(message):
@@ -100,7 +102,7 @@ async def on_voice_state_update(member, before, after):
 
   if after.channel is None:
     async with channel.typing():
-      await channel.send(name + 'が通話からきえてく・・・')
+      await channel.send(f'{name}が{before.channel.name}からきえてく・・・')
   else:
     async with channel.typing():
       await channel.send(name + 'が' + after.channel.name + 'に入ったよ')
