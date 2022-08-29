@@ -1,0 +1,6 @@
+# fly.toml file generated for yukari on 2022-08-27T17:52:49+09:00
+
+app = "yukari"
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
