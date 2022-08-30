@@ -1,6 +1,6 @@
 # yukariちゃん
 
-雑談してくれたりCryptoの価格を教えてくれるDiscord botです
+雑談してくれたり、誰かがボイスチャンネルに参加したことや、Cryptoの価格を教えてくれるDiscord botです
 
 <img src="https://user-images.githubusercontent.com/5690642/187445550-c6fc3b4a-ac7c-453d-b2f5-77e602b2f696.png" alt="かわいい顔の画像" width=320>
 
