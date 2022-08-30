@@ -1,7 +1,7 @@
 version: '3'
 services:
   discord_bot:
-    restart: always
+    restart: 'no'
     build: .
     working_dir: /root/src
     tty: true

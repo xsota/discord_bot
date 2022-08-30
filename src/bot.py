@@ -1,4 +1,5 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 import random
@@ -14,7 +15,12 @@ from asciichart import plot
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 ZATUDAN_TOKEN = os.environ.get('ZATUDAN_TOKEN')
 
-bot = commands.Bot(command_prefix='$')
+intents = discord.Intents.default()
+intents.message_content = True
+
+client=discord.Client(intents=intents)
+
+tree = app_commands.CommandTree(client)
 
 headers = {'Content-type': 'application/json'}
 
@@ -38,7 +44,7 @@ def getReply(text):
 
 async def replyTo(message):
   async with message.channel.typing():
-    text = message.content.replace('<@' + str(bot.user.id) + '>', '')
+    text = message.content.replace('<@' + str(client.user.id) + '>', '')
     replyText = getReply(text)
 
   replyMessage = await message.reply(replyText)
@@ -49,47 +55,46 @@ async def waitReply(message):
   def check(m):
     return m.reference is not None and m.reference.message_id == message.id
 
-  msg = await bot.wait_for('message',  timeout=180.0, check=check)
+  msg = await client.wait_for('message',  timeout=180.0, check=check)
   await replyTo(msg)
 
-@bot.event
+@client.event
 async def on_ready():
   print('ログイン')
   print('Servers connected to:')
-  for server in bot.guilds:
-    print(server.name)
+  await tree.sync()
 
-@bot.event
+  for guild in client.guilds:
+    print(f'{guild.name} {guild.id}')
+
+@client.event
 async def on_message(message):
-  if message.content.startswith('$'):
-    await bot.process_commands(message)
-
-  if message.author == bot.user or message.content.startswith('http'):
+  if message.author == client.user or message.content.startswith('http'):
     return
 
   yatte = re.match(r'(.*)やって$', message.content)
   if yatte:
     async with message.channel.typing():
       play = yatte.group(1)
-      await bot.change_presence(activity=discord.Game(name=play))
+      await client.change_presence(activity=discord.Game(name=play))
 
     await message.channel.send(play + 'をプレイするよ')
     return
 
-  if str(bot.user.id) in message.content:
+  if str(client.user.id) in message.content:
     await replyTo(message)
     return
 
   if random.randint(1, 6) == 6:
     async with message.channel.typing():
-      text = message.content.replace('<@' + str(bot.user.id) + '>', '')
+      text = message.content.replace('<@' + str(client.user.id) + '>', '')
       reply = getReply(text)
       m = await message.channel.send(reply)
 
     await waitReply(m)
 
 
-@bot.event
+@client.event
 async def on_voice_state_update(member, before, after):
   if before.channel == after.channel:
     return
@@ -107,13 +112,11 @@ async def on_voice_state_update(member, before, after):
     async with channel.typing():
       await channel.send(name + 'が' + after.channel.name + 'に入ったよ')
 
-@bot.command()
-async def add(ctx, a: int, b: int):
-  await ctx.send(a + b)
 
-@bot.command()
-async def chart(ctx, symbol):
-  await ctx.send(f'{symbol}/USDの1時間足のチャートを調べるねっ')
+@tree.command(description="symbolの1時間足のチャートを調べるねっ")
+@app_commands.describe(symbol="BTC")
+async def chart(interaction, symbol: str):
+  await interaction.response.defer() # 考え中・・・
 
   try:
     index = 1
@@ -121,24 +124,25 @@ async def chart(ctx, symbol):
     series = [x[index] for x in ohlcv]
     chart = plot(series[-25:], {'height': 15})
 
-    await ctx.send(f'```{chart}```')
+    await interaction.followup.send(f'{symbol}/USD 1h```{chart}```')
 
   except:
-    await ctx.send(f'わかんなかった！')
+    await interaction.followup.send(f'わかんなかった！')
+#
 
-@bot.command()
-async def price(ctx, symbol):
-  await ctx.send(f'{symbol}の価格を調べるねっ')
+@tree.command(description="symbolのUSD建ての価格を取得するよ")
+@app_commands.describe(symbol="BTC")
+async def price(interaction, symbol: str):
+  await interaction.response.defer()
 
   try:
     ticker = exchange.fetch_ticker(f'{symbol}/USD')
 
-    priceUSDT = (float(ticker['info']['a'][0]) + float(ticker['info']['b'][0])) / 2
+    price_usdt = (float(ticker['info']['a'][0]) + float(ticker['info']['b'][0])) / 2
 
-    await ctx.send(f'{priceUSDT} USDくらい！')
+    await interaction.followup.send(f'{symbol}は今{price_usdt} USDくらい！')
 
   except:
-    await ctx.send(f'{symbol}わかんない！')
+    await interaction.followup.send(f'{symbol}わかんない！')
 
-
-bot.run(DISCORD_TOKEN)
+client.run(DISCORD_TOKEN)
