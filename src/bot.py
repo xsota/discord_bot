@@ -145,4 +145,21 @@ async def price(interaction, symbol: str):
   except:
     await interaction.followup.send(f'{symbol}わかんない！')
 
+@tree.command(description="Governance Proposal")
+@app_commands.describe(title="タイトル",description="提案内容")
+async def proposal(interaction, title:str, description: str):
+  await interaction.response.defer()
+  embed = discord.Embed(title=title,description=description)
+  embed.add_field(name="Vote",value="🆗:Yes\n🙅:No \n💤:Abstain\n💢:No with Veto",inline=False)
+  # embed.add_field(name="Yes",value="0")
+  # embed.add_field(name="No",value="0")
+  # embed.add_field(name="Abstain",value="0")
+  # embed.add_field(name="No with Veto",value="0")
+
+  message = await interaction.followup.send(embed=embed)
+  emoji = "🆗🙅💤💢"
+
+  for i in range(4):
+    await message.add_reaction(emoji[i])
+
 client.run(DISCORD_TOKEN)
