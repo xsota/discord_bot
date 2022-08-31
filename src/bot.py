@@ -11,8 +11,8 @@ import json
 from _datetime import datetime
 from asciichart import plot
 
-
 from playwright.async_api import async_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 ZATUDAN_TOKEN = os.environ.get('ZATUDAN_TOKEN')
@@ -173,6 +173,8 @@ async def screenshot_browser(interaction, url: str):
     async with async_playwright() as p:
         ctx = await p.chromium.launch(headless=True)
         page = await ctx.new_page()
+        page.set_default_navigation_timeout(60000)
+
         await page.goto(url)
         await page.screenshot(path='ss.png', full_page=True)
         await ctx.close()
@@ -181,7 +183,9 @@ async def screenshot_browser(interaction, url: str):
 
         await interaction.followup.send(file=discord.File('ss.png'), embed=embed)
 
-  except:
+  except PlaywrightTimeoutError:
+     await interaction.followup.send(f'時間かかりそうだからやめるね！')
+  except :
     await interaction.followup.send(f'しっぱい！')
 
 
