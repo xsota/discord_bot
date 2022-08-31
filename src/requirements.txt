@@ -7,3 +7,4 @@ discord.py==2.0.1
 multidict==4.5.2
 websockets==9.1
 ccxt<1.62.0
+pytest-playwright

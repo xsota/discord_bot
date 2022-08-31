@@ -12,6 +12,8 @@ from _datetime import datetime
 from asciichart import plot
 
 
+from playwright.async_api import async_playwright
+
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 ZATUDAN_TOKEN = os.environ.get('ZATUDAN_TOKEN')
 
@@ -161,5 +163,26 @@ async def proposal(interaction, title:str, description: str):
 
   for i in range(4):
     await message.add_reaction(emoji[i])
+
+@tree.command(description='スクリーンショットを撮るよ')
+@app_commands.describe(url='URL')
+async def screenshot_browser(interaction, url: str):
+  await interaction.response.defer()
+
+  try:
+    async with async_playwright() as p:
+        ctx = await p.chromium.launch(headless=True)
+        page = await ctx.new_page()
+        await page.goto(url)
+        await page.screenshot(path='ss.png', full_page=True)
+        await ctx.close()
+        embed = discord.Embed(title=url)
+        embed.set_image(url='attachment://ss.png')
+
+        await interaction.followup.send(file=discord.File('ss.png'), embed=embed)
+
+  except:
+    await interaction.followup.send(f'しっぱい！')
+
 
 client.run(DISCORD_TOKEN)
