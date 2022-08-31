@@ -1,6 +1,6 @@
 version: '3'
 services:
-  discord_bot:
+  app:
     restart: 'no'
     build: .
     working_dir: /root/src
@@ -9,5 +9,5 @@ services:
       - ./src:/root/src
     env_file:
       - .env
-    command: python bot.py
+    command: bash
 
