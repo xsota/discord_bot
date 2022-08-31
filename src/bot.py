@@ -1,18 +1,15 @@
-import discord
-from discord import app_commands
-from discord.ext import commands
-
-import random
 import os
-import requests
+import random
 import re
-import ccxt
-import json
-from _datetime import datetime
-from asciichart import plot
 
+import ccxt
+import discord
+import requests
+from discord import app_commands
 from playwright.async_api import async_playwright
-from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+
+from asciichart import plot
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 ZATUDAN_TOKEN = os.environ.get('ZATUDAN_TOKEN')
