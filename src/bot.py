@@ -174,14 +174,17 @@ async def screenshot_browser(interaction, url: str):
 
         await page.goto(url)
         await page.screenshot(path='ss.png', full_page=True)
+        title = await page.title()
+
         await ctx.close()
-        embed = discord.Embed(title=url)
+
+        embed = discord.Embed(title=title)
         embed.set_image(url='attachment://ss.png')
 
         await interaction.followup.send(file=discord.File('ss.png'), embed=embed)
 
   except PlaywrightTimeoutError:
-     await interaction.followup.send(f'時間かかりそうだからやめるね！')
+    await interaction.followup.send(f'時間かかりそうだからやめるね！')
   except :
     await interaction.followup.send(f'しっぱい！')
 
