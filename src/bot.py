@@ -84,7 +84,7 @@ async def on_message(message):
     await replyTo(message)
     return
 
-  if random.randint(1, 6) == 6:
+  if random.randint(1, 36) == 1:
     async with message.channel.typing():
       text = message.content.replace('<@' + str(client.user.id) + '>', '')
       reply = getReply(text)
