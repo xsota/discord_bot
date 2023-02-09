@@ -16,7 +16,7 @@ def send_prompt(prompt=''):
     top_p=1,
     frequency_penalty=0,
     presence_penalty=0.5,
-    stop=[" Human=", " AI="]
+    stop=[" Human:", " AI:"]
   )
 
   print(response)
