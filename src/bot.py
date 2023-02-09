@@ -10,6 +10,7 @@ from playwright.async_api import async_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from asciichart import plot
+from open_ai_chat import send_prompt
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 ZATUDAN_TOKEN = os.environ.get('ZATUDAN_TOKEN')
@@ -32,10 +33,10 @@ def getUserNickName(member):
 
 
 def getReply(text):
-  url = 'https://chatbot-api.userlocal.jp/api/chat?message=' + text + '&key=' + ZATUDAN_TOKEN
-  result = requests.get(url)
-  data = result.json()
-  response = data['result']
+  #url = 'https://chatbot-api.userlocal.jp/api/chat?message=' + text + '&key=' + ZATUDAN_TOKEN
+  #result = send_prompt(text)
+  #data = result.json()
+  response = send_prompt(text)
 
   print('response: %s' % response)
 
