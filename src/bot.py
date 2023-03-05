@@ -32,31 +32,31 @@ def getUserNickName(member):
   return member.name if member.nick is None else member.nick
 
 
-def getReply(text):
+def getReply(text, gpt_messages=None):
   #url = 'https://chatbot-api.userlocal.jp/api/chat?message=' + text + '&key=' + ZATUDAN_TOKEN
   #result = send_prompt(text)
   #data = result.json()
-  response = send_prompt(text)
+  messages = send_prompt(text, gpt_messages)
 
-  print('response: %s' % response)
+  print('response: %s' % messages)
 
-  return response
+  return messages
 
-async def replyTo(message):
+async def replyTo(message, gpt_messages=None):
   async with message.channel.typing():
     text = message.content.replace('<@' + str(client.user.id) + '>', '')
-    replyText = getReply(text)
+    messages = getReply(text, gpt_messages)
 
-  replyMessage = await message.reply(replyText)
+  replyMessage = await message.reply(messages[-1]['content'])
 
-  await waitReply(replyMessage)
+  await waitReply(replyMessage, messages)
 
-async def waitReply(message):
+async def waitReply(message, gpt_messages):
   def check(m):
     return m.reference is not None and m.reference.message_id == message.id
 
   msg = await client.wait_for('message',  timeout=180.0, check=check)
-  await replyTo(msg)
+  await replyTo(msg, gpt_messages)
 
 @client.event
 async def on_ready():
@@ -88,10 +88,10 @@ async def on_message(message):
   if random.randint(1, 36) == 1:
     async with message.channel.typing():
       text = message.content.replace('<@' + str(client.user.id) + '>', '')
-      reply = getReply(text)
-      m = await message.channel.send(reply)
+      messages = getReply(text)
+      m = await message.channel.send(messages[-1]['content'])
 
-    await waitReply(m)
+    await waitReply(m, messages)
 
 
 @client.event

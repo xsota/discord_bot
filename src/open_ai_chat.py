@@ -4,6 +4,7 @@ import requests
 import json
 
 def send_prompt(prompt='', messages=None):
+  print(messages)
   if messages is None:
     messages = [{"role": "system",
                "content": "Below is a conversation with the AI assistant. The AI assistant's name is Yukari and she is a Japanese girl. The age of the AI assistant is 16 years old. AI assistants think of themselves as people, not AIs."}]
@@ -21,4 +22,4 @@ def send_prompt(prompt='', messages=None):
 
   messages.append(response['choices'][0]['message'])
 
-  return response['choices'][0]['message']
+  return messages
