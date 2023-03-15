@@ -13,7 +13,6 @@ from asciichart import plot
 from open_ai_chat import send_prompt
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-ZATUDAN_TOKEN = os.environ.get('ZATUDAN_TOKEN')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -33,9 +32,6 @@ def getUserNickName(member):
 
 
 def getReply(text, gpt_messages=None):
-  #url = 'https://chatbot-api.userlocal.jp/api/chat?message=' + text + '&key=' + ZATUDAN_TOKEN
-  #result = send_prompt(text)
-  #data = result.json()
   messages = send_prompt(text, gpt_messages)
 
   print('response: %s' % messages)
