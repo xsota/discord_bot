@@ -69,7 +69,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-  if message.author == client.user or message.content.startswith('http'):
+  if message.author == client.user or message.content.startswith('http') or message.content == '':
     return
 
   yatte = re.match(r'(.*)やって$', message.content)
