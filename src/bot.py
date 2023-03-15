@@ -17,7 +17,7 @@ DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
 
-client=discord.Client(intents=intents)
+client = discord.Client(intents=intents)
 
 tree = app_commands.CommandTree(client)
 
@@ -38,6 +38,7 @@ def getReply(text, gpt_messages=None):
 
   return messages
 
+
 async def replyTo(message, gpt_messages=None):
   async with message.channel.typing():
     text = message.content.replace('<@' + str(client.user.id) + '>', '')
@@ -47,12 +48,14 @@ async def replyTo(message, gpt_messages=None):
 
   await waitReply(replyMessage, messages)
 
+
 async def waitReply(message, gpt_messages):
   def check(m):
     return m.reference is not None and m.reference.message_id == message.id
 
-  msg = await client.wait_for('message',  timeout=180.0, check=check)
+  msg = await client.wait_for('message', timeout=180.0, check=check)
   await replyTo(msg, gpt_messages)
+
 
 @client.event
 async def on_ready():
@@ -62,6 +65,7 @@ async def on_ready():
 
   for guild in client.guilds:
     print(f'{guild.name} {guild.id}')
+
 
 @client.event
 async def on_message(message):
@@ -112,7 +116,7 @@ async def on_voice_state_update(member, before, after):
 @tree.command(description="symbolの1時間足のチャートを調べるねっ")
 @app_commands.describe(symbol="BTC")
 async def chart(interaction, symbol: str):
-  await interaction.response.defer() # 考え中・・・
+  await interaction.response.defer()  # 考え中・・・
 
   try:
     index = 1
@@ -124,6 +128,8 @@ async def chart(interaction, symbol: str):
 
   except:
     await interaction.followup.send(f'わかんなかった！')
+
+
 #
 
 @tree.command(description="symbolのUSD建ての価格を取得するよ")
@@ -141,12 +147,13 @@ async def price(interaction, symbol: str):
   except:
     await interaction.followup.send(f'{symbol}わかんない！')
 
+
 @tree.command(description="Governance Proposal")
-@app_commands.describe(title="タイトル",description="提案内容")
-async def proposal(interaction, title:str, description: str):
+@app_commands.describe(title="タイトル", description="提案内容")
+async def proposal(interaction, title: str, description: str):
   await interaction.response.defer()
-  embed = discord.Embed(title=title,description=description)
-  embed.add_field(name="Vote",value="🆗:Yes\n🙅:No \n💤:Abstain\n💢:No with Veto",inline=False)
+  embed = discord.Embed(title=title, description=description)
+  embed.add_field(name="Vote", value="🆗:Yes\n🙅:No \n💤:Abstain\n💢:No with Veto", inline=False)
   # embed.add_field(name="Yes",value="0")
   # embed.add_field(name="No",value="0")
   # embed.add_field(name="Abstain",value="0")
@@ -158,6 +165,7 @@ async def proposal(interaction, title:str, description: str):
   for i in range(4):
     await message.add_reaction(emoji[i])
 
+
 @tree.command(description='スクリーンショットを撮るよ')
 @app_commands.describe(url='URL')
 async def screenshot_browser(interaction, url: str):
@@ -165,24 +173,24 @@ async def screenshot_browser(interaction, url: str):
 
   try:
     async with async_playwright() as p:
-        ctx = await p.chromium.launch(headless=True)
-        page = await ctx.new_page()
-        page.set_default_navigation_timeout(60000)
+      ctx = await p.chromium.launch(headless=True)
+      page = await ctx.new_page()
+      page.set_default_navigation_timeout(60000)
 
-        await page.goto(url)
-        await page.screenshot(path='ss.png', full_page=True)
-        title = await page.title()
+      await page.goto(url)
+      await page.screenshot(path='ss.png', full_page=True)
+      title = await page.title()
 
-        await ctx.close()
+      await ctx.close()
 
-        embed = discord.Embed(title=title)
-        embed.set_image(url='attachment://ss.png')
+      embed = discord.Embed(title=title)
+      embed.set_image(url='attachment://ss.png')
 
-        await interaction.followup.send(file=discord.File('ss.png'), embed=embed)
+      await interaction.followup.send(file=discord.File('ss.png'), embed=embed)
 
   except PlaywrightTimeoutError:
     await interaction.followup.send(f'時間かかりそうだからやめるね！')
-  except :
+  except:
     await interaction.followup.send(f'しっぱい！')
 
 
