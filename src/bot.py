@@ -31,8 +31,8 @@ def get_user_nickname(member):
   return member.name if member.nick is None else member.nick
 
 
-def get_reply(text, gpt_messages=None):
-  messages = send_prompt(text, gpt_messages)
+def get_reply(text, nickname, gpt_messages=None):
+  messages = send_prompt(text, nickname, gpt_messages)
 
   print('response: %s' % messages)
 
@@ -42,7 +42,8 @@ def get_reply(text, gpt_messages=None):
 async def reply_to(message, gpt_messages=None):
   async with message.channel.typing():
     text = message.content.replace('<@' + str(client.user.id) + '>', '')
-    messages = get_reply(text, gpt_messages)
+    nickname = get_user_nickname(message.author)
+    messages = get_reply(text, nickname, gpt_messages)
 
   replyMessage = await message.reply(messages[-1]['content'])
 
@@ -88,7 +89,7 @@ async def on_message(message):
   if random.randint(1, RANDOM_REPLY_CHANCE) == 1:
     async with message.channel.typing():
       text = message.content.replace('<@' + str(client.user.id) + '>', '')
-      messages = get_reply(text)
+      messages = await get_reply(text)
       m = await message.channel.send(messages[-1]['content'])
 
     await wait_reply(m, messages)
