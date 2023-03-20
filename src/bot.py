@@ -12,6 +12,7 @@ from asciichart import plot
 from open_ai_chat import send_prompt
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
+RANDOM_REPLY_CHANCE = 36
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -84,7 +85,7 @@ async def on_message(message):
     await reply_to(message)
     return
 
-  if random.randint(1, 36) == 1:
+  if random.randint(1, RANDOM_REPLY_CHANCE) == 1:
     async with message.channel.typing():
       text = message.content.replace('<@' + str(client.user.id) + '>', '')
       messages = get_reply(text)
