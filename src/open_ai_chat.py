@@ -41,13 +41,17 @@ def send_prompt(prompt='', nickname='', messages=None):
 
   messages.append({"role": "user", "content": f'{nickname}「{prompt}」'})
 
-  response = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
-    messages=messages
-  )
+  try:
+    response = openai.ChatCompletion.create(
+      model="gpt-3.5-turbo",
+      messages=messages,
+      timeout=10
+    )
 
-  print(response)
+    print(response)
 
-  messages.append(response['choices'][0]['message'])
+    messages.append(response['choices'][0]['message'])
 
-  return messages
+    return messages
+  except:
+    raise
