@@ -12,7 +12,7 @@ from asciichart import plot
 from open_ai_chat import send_prompt
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-RANDOM_REPLY_CHANCE = 36
+RANDOM_REPLY_CHANCE = 3
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -25,6 +25,18 @@ headers = {'Content-type': 'application/json'}
 
 appId = None
 exchange = ccxt.kraken()
+
+channel_message_history = {}
+
+
+def add_message_to_history(channel_id, message):
+  if channel_id not in channel_message_history:
+    channel_message_history[channel_id] = []
+  channel_message_history[channel_id].append({"role": "user", "content": f'{get_user_nickname(message.author)}「{message.content}」'})
+
+  # 5件を超えた場合、最も古いメッセージを削除
+  if len(channel_message_history[channel_id]) > 5:
+    channel_message_history[channel_id].pop(0)
 
 
 def get_user_nickname(member):
@@ -83,17 +95,20 @@ async def on_message(message):
     return
 
   if str(client.user.id) in message.content:
-    await reply_to(message)
+    await reply_to(message, channel_message_history[message.channel.id])
     return
 
   if random.randint(1, RANDOM_REPLY_CHANCE) == 1:
     async with message.channel.typing():
       text = message.content.replace('<@' + str(client.user.id) + '>', '')
-      messages = await get_reply(text)
+      name = get_user_nickname(message.author)
+      messages = get_reply(text, name, channel_message_history[message.channel.id])
       m = await message.channel.send(messages[-1]['content'])
 
     await wait_reply(m, messages)
 
+  # メッセージ履歴にメッセージを追加
+  add_message_to_history(message.channel.id, message)
 
 @client.event
 async def on_voice_state_update(member, before, after):
