@@ -12,7 +12,9 @@ from asciichart import plot
 from open_ai_chat import send_prompt
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
+
 RANDOM_REPLY_CHANCE = 36
+
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -30,21 +32,36 @@ channel_message_history = {}
 
 
 def add_message_to_history(channel_id, message):
+  text = remove_mentions(message.content)
+
+  if text == '':
+    return False
+
   if channel_id not in channel_message_history:
     channel_message_history[channel_id] = []
-  channel_message_history[channel_id].append({"role": "user", "content": f'{get_user_nickname(message.author)}「{message.content}」'})
+
+  channel_message_history[channel_id].append({"role": "user", "content": f'{get_user_nickname(message.author)}「{text}」'})
+
+  return True
 
   # 5件を超えた場合、最も古いメッセージを削除
   if len(channel_message_history[channel_id]) > 5:
     channel_message_history[channel_id].pop(0)
 
+def remove_mentions(text):
+  # 正規表現でメンション部分を削除
+  mention_pattern = r'<@!?[0-9]+>'
+  return re.sub(mention_pattern, '', text)
 
 def get_user_nickname(member):
   return member.name if member.nick is None else member.nick
 
 
-def get_reply(text, nickname, gpt_messages=None):
-  messages = send_prompt(text, nickname, gpt_messages)
+def get_reply(message, gpt_messages=None):
+  if gpt_messages is None:
+    gpt_messages = channel_message_history[message.channel.id]
+
+  messages = send_prompt(gpt_messages)
 
   print('response: %s' % messages)
 
@@ -52,10 +69,11 @@ def get_reply(text, nickname, gpt_messages=None):
 
 
 async def reply_to(message, gpt_messages=None):
+  if gpt_messages is None:
+    gpt_messages = channel_message_history[message.channel.id]
+
   async with message.channel.typing():
-    text = message.content.replace('<@' + str(client.user.id) + '>', '')
-    nickname = get_user_nickname(message.author)
-    messages = get_reply(text, nickname, gpt_messages)
+    messages = get_reply(message, gpt_messages)
 
   replyMessage = await message.reply(messages[-1]['content'])
 
@@ -94,21 +112,21 @@ async def on_message(message):
     await message.channel.send(f"{play}をプレイするよ")
     return
 
-  if str(client.user.id) in message.content:
-    await reply_to(message, channel_message_history[message.channel.id])
-    return
-
-  if random.randint(1, RANDOM_REPLY_CHANCE) == 1:
-    async with message.channel.typing():
-      text = message.content.replace('<@' + str(client.user.id) + '>', '')
-      name = get_user_nickname(message.author)
-      messages = get_reply(text, name, channel_message_history[message.channel.id])
-      m = await message.channel.send(messages[-1]['content'])
-
-    await wait_reply(m, messages)
-
   # メッセージ履歴にメッセージを追加
   add_message_to_history(message.channel.id, message)
+  print(channel_message_history)
+
+  if str(client.user.id) in message.content:
+    await reply_to(message)
+    return
+
+  if random.randint(1, RANDOM_REPLY_CHANCE) == 1 and len(channel_message_history[message.channel.id]) > 2:
+    async with message.channel.typing():
+      messages = get_reply(message)
+      m = await message.channel.send(messages[-1]['content'])
+      
+    await wait_reply(m, messages)
+    return
 
 @client.event
 async def on_voice_state_update(member, before, after):
