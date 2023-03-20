@@ -27,11 +27,11 @@ appId = None
 exchange = ccxt.kraken()
 
 
-def getUserNickName(member):
+def get_user_nickname(member):
   return member.name if member.nick is None else member.nick
 
 
-def getReply(text, gpt_messages=None):
+def get_reply(text, gpt_messages=None):
   messages = send_prompt(text, gpt_messages)
 
   print('response: %s' % messages)
@@ -39,22 +39,22 @@ def getReply(text, gpt_messages=None):
   return messages
 
 
-async def replyTo(message, gpt_messages=None):
+async def reply_to(message, gpt_messages=None):
   async with message.channel.typing():
     text = message.content.replace('<@' + str(client.user.id) + '>', '')
-    messages = getReply(text, gpt_messages)
+    messages = get_reply(text, gpt_messages)
 
   replyMessage = await message.reply(messages[-1]['content'])
 
-  await waitReply(replyMessage, messages)
+  await wait_reply(replyMessage, messages)
 
 
-async def waitReply(message, gpt_messages):
+async def wait_reply(message, gpt_messages):
   def check(m):
     return m.reference is not None and m.reference.message_id == message.id
 
   msg = await client.wait_for('message', timeout=180.0, check=check)
-  await replyTo(msg, gpt_messages)
+  await reply_to(msg, gpt_messages)
 
 
 @client.event
@@ -82,16 +82,16 @@ async def on_message(message):
     return
 
   if str(client.user.id) in message.content:
-    await replyTo(message)
+    await reply_to(message)
     return
 
   if random.randint(1, 36) == 1:
     async with message.channel.typing():
       text = message.content.replace('<@' + str(client.user.id) + '>', '')
-      messages = getReply(text)
+      messages = get_reply(text)
       m = await message.channel.send(messages[-1]['content'])
 
-    await waitReply(m, messages)
+    await wait_reply(m, messages)
 
 
 @client.event
@@ -103,7 +103,7 @@ async def on_voice_state_update(member, before, after):
 
   channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
 
-  name = getUserNickName(member)
+  name = get_user_nickname(member)
 
   if after.channel is None:
     async with channel.typing():
