@@ -77,7 +77,7 @@ async def on_message(message):
       play = yatte.group(1)
       await client.change_presence(activity=discord.Game(name=play))
 
-    await message.channel.send(play + 'をプレイするよ')
+    await message.channel.send(f"{play}をプレイするよ")
     return
 
   if str(client.user.id) in message.content:
@@ -109,7 +109,7 @@ async def on_voice_state_update(member, before, after):
       await channel.send(f'{name}が{before.channel.name}からきえてく・・・')
   else:
     async with channel.typing():
-      await channel.send(name + 'が' + after.channel.name + 'に入ったよ')
+      await channel.send(f"{name}が{after.channel.name}に入ったよ")
 
 
 @tree.command(description="symbolの1時間足のチャートを調べるねっ")
