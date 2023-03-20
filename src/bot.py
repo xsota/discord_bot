@@ -31,8 +31,8 @@ exchange = ccxt.kraken()
 channel_message_history = {}
 
 
-def add_message_to_history(channel_id, message):
-  text = remove_mentions(message.content)
+def add_message_to_history(channel_id, content, name, role="user"):
+  text = remove_mentions(content)
 
   if text == '':
     return False
@@ -40,7 +40,13 @@ def add_message_to_history(channel_id, message):
   if channel_id not in channel_message_history:
     channel_message_history[channel_id] = []
 
-  channel_message_history[channel_id].append({"role": "user", "content": f'{get_user_nickname(message.author)}「{text}」'})
+  if role == "user":
+    channel_message_history[channel_id].append({"role": "user", "content": f'{name}「{text}」'})
+  elif role == "assistant":
+    channel_message_history[channel_id].append({"role": "assistant", "content": f'{text}'})
+  elif role == "system":
+    channel_message_history[channel_id].append({"role": "system", "content": f'{text}'})
+
 
   # 5件を超えた場合、最も古いメッセージを削除
   if len(channel_message_history[channel_id]) > 5:
@@ -100,7 +106,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-  if message.author == client.user or message.content.startswith('http') or message.content == '':
+  if message.content.startswith('http') or message.content == '':
     return
 
   yatte = re.match(r'(.*)やって$', message.content)
@@ -113,7 +119,10 @@ async def on_message(message):
     return
 
   # メッセージ履歴にメッセージを追加
-  add_message_to_history(message.channel.id, message)
+  if message.author == client.user:
+    add_message_to_history(message.channel.id, message.content, get_user_nickname(message.author), role="assistant")
+  else:
+    add_message_to_history(message.channel.id, message.content, get_user_nickname(message.author))
   print(channel_message_history)
 
   if str(client.user.id) in message.content:
@@ -134,17 +143,19 @@ async def on_voice_state_update(member, before, after):
     return
 
   server = before.channel.guild if after.channel is None else after.channel.guild
-
   channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
-
   name = get_user_nickname(member)
 
   if after.channel is None:
     async with channel.typing():
+      add_message_to_history(channel.id, f'{name}が{before.channel.name}から消えた', name,"system")
       await channel.send(f'{name}が{before.channel.name}からきえてく・・・')
   else:
     async with channel.typing():
+      add_message_to_history(channel.id, f'{name}が{after.channel.name}に参加した', name, "system")
       await channel.send(f"{name}が{after.channel.name}に入ったよ")
+
+
 
 
 @tree.command(description="symbolの1時間足のチャートを調べるねっ")
