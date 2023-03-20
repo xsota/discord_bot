@@ -12,7 +12,7 @@ from asciichart import plot
 from open_ai_chat import send_prompt
 
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-RANDOM_REPLY_CHANCE = 3
+RANDOM_REPLY_CHANCE = 36
 
 intents = discord.Intents.default()
 intents.message_content = True
