@@ -42,11 +42,11 @@ def add_message_to_history(channel_id, message):
 
   channel_message_history[channel_id].append({"role": "user", "content": f'{get_user_nickname(message.author)}「{text}」'})
 
-  return True
-
   # 5件を超えた場合、最も古いメッセージを削除
   if len(channel_message_history[channel_id]) > 5:
     channel_message_history[channel_id].pop(0)
+
+  return True
 
 def remove_mentions(text):
   # 正規表現でメンション部分を削除
@@ -124,7 +124,7 @@ async def on_message(message):
     async with message.channel.typing():
       messages = get_reply(message)
       m = await message.channel.send(messages[-1]['content'])
-      
+
     await wait_reply(m, messages)
     return
 
