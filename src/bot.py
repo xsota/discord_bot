@@ -4,7 +4,6 @@ import re
 
 import ccxt
 import discord
-import requests
 from discord import app_commands
 from playwright.async_api import async_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError

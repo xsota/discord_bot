@@ -1,7 +1,7 @@
 import os
+
 import openai
-import requests
-import json
+
 
 def send_prompt(prompt='', messages=None):
   print(messages)
