@@ -15,7 +15,6 @@ DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 
 RANDOM_REPLY_CHANCE = 36
 
-
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -29,6 +28,7 @@ appId = None
 exchange = ccxt.kraken()
 
 channel_message_history = {}
+
 
 def add_message_to_history(channel_id, content, name, role="user"):
   text = remove_mentions(content)
@@ -52,13 +52,16 @@ def add_message_to_history(channel_id, content, name, role="user"):
 
   return True
 
+
 def remove_mentions(text):
   # 正規表現でメンション部分を削除
   mention_pattern = r'<@!?[0-9]+>'
   return re.sub(mention_pattern, '', text)
 
+
 def get_user_nickname(member):
   return member.name if member.nick is None else member.nick
+
 
 def get_reply(message, gpt_messages=None):
   if gpt_messages is None:
@@ -69,6 +72,7 @@ def get_reply(message, gpt_messages=None):
   print('response: %s' % messages)
 
   return messages
+
 
 async def reply_to(message, gpt_messages=None):
   if gpt_messages is None:
@@ -81,12 +85,14 @@ async def reply_to(message, gpt_messages=None):
 
   await wait_reply(replyMessage, messages)
 
+
 async def wait_reply(message, gpt_messages):
   def check(m):
     return m.reference is not None and m.reference.message_id == message.id
 
   msg = await client.wait_for('message', timeout=180.0, check=check)
   await reply_to(msg, gpt_messages)
+
 
 @client.event
 async def on_ready():
@@ -96,6 +102,7 @@ async def on_ready():
 
   for guild in client.guilds:
     print(f'{guild.name} {guild.id}')
+
 
 @client.event
 async def on_message(message):
@@ -130,6 +137,7 @@ async def on_message(message):
     await wait_reply(m, messages)
     return
 
+
 @client.event
 async def on_voice_state_update(member, before, after):
   if before.channel == after.channel:
@@ -141,12 +149,13 @@ async def on_voice_state_update(member, before, after):
 
   if after.channel is None:
     async with channel.typing():
-      add_message_to_history(channel.id, f'{name}が{before.channel.name}から消えた', name,"system")
+      add_message_to_history(channel.id, f'{name}が{before.channel.name}から消えた', name, "system")
       await channel.send(f'{name}が{before.channel.name}からきえてく・・・')
   else:
     async with channel.typing():
       add_message_to_history(channel.id, f'{name}が{after.channel.name}に参加した', name, "system")
       await channel.send(f"{name}が{after.channel.name}に入ったよ")
+
 
 @tree.command(description="symbolの1時間足のチャートを調べるねっ")
 @app_commands.describe(symbol="BTC")
@@ -164,6 +173,7 @@ async def chart(interaction, symbol: str):
   except:
     await interaction.followup.send(f'わかんなかった！')
 
+
 @tree.command(description="symbolのUSD建ての価格を取得するよ")
 @app_commands.describe(symbol="BTC")
 async def price(interaction, symbol: str):
@@ -178,6 +188,7 @@ async def price(interaction, symbol: str):
 
   except:
     await interaction.followup.send(f'{symbol}わかんない！')
+
 
 @tree.command(description="Governance Proposal")
 @app_commands.describe(title="タイトル", description="提案内容")
@@ -223,5 +234,6 @@ async def screenshot_browser(interaction, url: str):
     await interaction.followup.send(f'時間かかりそうだからやめるね！')
   except:
     await interaction.followup.send(f'しっぱい！')
+
 
 client.run(DISCORD_TOKEN)
