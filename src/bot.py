@@ -150,11 +150,9 @@ async def on_voice_state_update(member, before, after):
 
   if after.channel is None:
     async with channel.typing():
-      add_message_to_history(channel.id, f'{name}が{before.channel.name}から消えた', name, "system")
       await channel.send(f'{name}が{before.channel.name}からきえてく・・・')
   else:
     async with channel.typing():
-      add_message_to_history(channel.id, f'{name}が{after.channel.name}に参加した', name, "system")
       await channel.send(f"{name}が{after.channel.name}に入ったよ")
 
 
