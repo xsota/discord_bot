@@ -41,7 +41,6 @@ def send_prompt(messages):
                 {"role": "user", "content": "name「hi」"},
                 {"role": "assistant", "content": "こんにちは！"}] + messages
 
-  print(messages)
 
   openai.api_key = os.environ.get('OPEN_AI_API_KEY')
 

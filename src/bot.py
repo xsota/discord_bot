@@ -91,6 +91,8 @@ async def wait_reply(message, gpt_messages):
     return m.reference is not None and m.reference.message_id == message.id
 
   msg = await client.wait_for('message', timeout=180.0, check=check)
+  gpt_messages.append({"role": "user", "content": f"{get_user_nickname(msg.author)}「{msg.content}」"})
+
   await reply_to(msg, gpt_messages)
 
 
@@ -123,7 +125,6 @@ async def on_message(message):
     add_message_to_history(message.channel.id, message.content, get_user_nickname(message.author), role="assistant")
   else:
     add_message_to_history(message.channel.id, message.content, get_user_nickname(message.author))
-  print(channel_message_history)
 
   if str(client.user.id) in message.content:
     await reply_to(message)
