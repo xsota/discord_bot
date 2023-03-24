@@ -3,6 +3,9 @@ from discord.ext import commands
 import re
 from open_ai_chat import send_prompt
 import random
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class EventsCog(commands.Cog):
@@ -14,11 +17,11 @@ class EventsCog(commands.Cog):
 
   @commands.Cog.listener()
   async def on_ready(self):
-    print('ログイン')
-    print('Servers connected to:')
+    logger.info('ログイン')
+    logger.info('Servers connected to:')
 
     for guild in self.bot.guilds:
-      print(f'{guild.name} {guild.id}')
+      logger.info(f'{guild.name} {guild.id}')
 
   @commands.Cog.listener()
   async def on_message(self, message):
@@ -89,6 +92,8 @@ class EventsCog(commands.Cog):
     if len(self.channel_message_history[channel_id]) > 5:
       self.channel_message_history[channel_id].pop(0)
 
+    logger.info(self.channel_message_history)
+
     return True
 
   def remove_mentions(self, text):
@@ -104,8 +109,6 @@ class EventsCog(commands.Cog):
       gpt_messages = self.channel_message_history[message.channel.id]
 
     messages = send_prompt(gpt_messages)
-
-    print('response: %s' % messages)
 
     return messages
 

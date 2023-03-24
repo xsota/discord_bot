@@ -51,8 +51,6 @@ def send_prompt(messages):
       timeout=10
     )
 
-    print(response)
-
     messages.append(response['choices'][0]['message'])
 
     return messages
