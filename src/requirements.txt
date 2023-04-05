@@ -9,3 +9,4 @@ websockets==9.1
 ccxt<1.62.0
 pytest-playwright
 openai
+python-dotenv
