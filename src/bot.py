@@ -6,6 +6,10 @@ from logging import basicConfig, getLogger, INFO
 basicConfig(level=INFO)
 logger = getLogger(__name__)
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 DISCORD_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 
 intents = discord.Intents.default()
