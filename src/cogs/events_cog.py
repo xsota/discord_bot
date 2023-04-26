@@ -9,6 +9,7 @@ logger = getLogger(__name__)
 
 
 class EventsCog(commands.Cog):
+  MAX_HISTORY_LENGTH = 10
   RANDOM_REPLY_CHANCE = 36
   channel_message_history = {}
 
@@ -88,8 +89,8 @@ class EventsCog(commands.Cog):
     elif role == "system":
       self.channel_message_history[channel_id].append({"role": "system", "content": f'{text}'})
 
-    # 5件を超えた場合、最も古いメッセージを削除
-    if len(self.channel_message_history[channel_id]) > 5:
+    # MAX_HISTORY_LENGTH件を超えた場合、最も古いメッセージを削除
+    if len(self.channel_message_history[channel_id]) > self.MAX_HISTORY_LENGTH:
       self.channel_message_history[channel_id].pop(0)
 
     logger.info(self.channel_message_history)
