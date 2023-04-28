@@ -83,7 +83,7 @@ class EventsCog(commands.Cog):
       self.channel_message_history[channel_id] = []
 
     if role == "user":
-      self.channel_message_history[channel_id].append({"role": "user", "content": f'{name}「{text}」'})
+      self.channel_message_history[channel_id].append({"role": "user", "content": f'{name}: {text}'})
     elif role == "assistant":
       self.channel_message_history[channel_id].append({"role": "assistant", "content": f'{text}'})
     elif role == "system":
