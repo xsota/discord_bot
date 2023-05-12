@@ -120,9 +120,9 @@ class EventsCog(commands.Cog):
     async with message.channel.typing():
       messages = self.get_reply(message, gpt_messages)
 
-    replyMessage = await message.reply(messages[-1]['content'])
+    reply_message = await message.reply(messages[-1]['content'])
 
-    await self.wait_reply(replyMessage, messages)
+    await self.wait_reply(reply_message, messages)
 
   async def wait_reply(self, message, gpt_messages):
     def check(m):
