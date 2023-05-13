@@ -85,7 +85,11 @@ class EventsCog(commands.Cog):
     if role == "user":
       self.channel_message_history[channel_id].append({"role": "user", "content": f'{name}: {text}'})
     elif role == "assistant":
-      self.channel_message_history[channel_id].append({"role": "assistant", "content": f'{text}'})
+      voice_state_update_pattern = re.compile(r'^.*が(.*)(からきえてく・・・|に入ったよ)$')
+      if voice_state_update_pattern.match(content):
+        self.channel_message_history[channel_id].append({"role": "system", "content": f'{text}'})
+      else:
+        self.channel_message_history[channel_id].append({"role": "assistant", "content": f'{text}'})
     elif role == "system":
       self.channel_message_history[channel_id].append({"role": "system", "content": f'{text}'})
 
