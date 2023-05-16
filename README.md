@@ -9,11 +9,28 @@
 ![image](https://github.com/xsota/discord_bot/assets/5690642/4543f503-045a-46c8-9d69-1d5bf3bc557a)
 
 
+
+## yukariちゃんとDiscordｎ招待したい人
 yukariちゃんを[Discordに招待する](https://discordapp.com/api/oauth2/authorize?client_id=551785476584112139&permissions=0&scope=bot)
 
 
+## ChatGPTを使ったDiscord botを自分の環境とかで動かしたい人
+- git cloneする
+- とりあえずbot.pyが動くように例えばpip installとかする
+```
+pip install -r src/requirements.txt
+```
+- .env.exampleを参考に環境変数を設定する (DiscordとかOpenAIのトークンとか、キャラのプロンプトとか)
+- 動かしてみる
+```
+python src/bot.py
+```
 
-### Deploy
+## とりあえずChatGPTを使ったおれおれDiscord botが欲しい人
+- git cloneする
+- fly.ioのアカウントを作ったりする
+- flyctlをインストールしたりする (https://fly.io/docs/hands-on/install-flyctl/)
+- プロンプトとか環境変数を.env.exampleを参考に設定する
 ```
 fly deploy
 ```
