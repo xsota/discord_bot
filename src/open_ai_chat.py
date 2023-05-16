@@ -11,6 +11,8 @@ def send_prompt(messages):
     messages = [{"role": "system", "content": os.environ.get('CHARACTER_PROMPT')},
                 {"role": "system", "content": "User comments are in the format Name: Comment"},
                 {"role": "system", "content": f"Current JST:{formatted_datetime}"},
+                {"role": "user", "content": "name: hi!"},
+                {"role": "assistant", "content": "こんにちは！"}
                 ] + messages
 
   openai.api_key = os.environ.get('OPEN_AI_API_KEY')
