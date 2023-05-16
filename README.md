@@ -10,7 +10,7 @@
 
 
 
-## yukariちゃんとDiscordに招待したい人
+## yukariちゃんとDiscordで喋ってみたい人
 yukariちゃんを[Discordに招待する](https://discordapp.com/api/oauth2/authorize?client_id=551785476584112139&permissions=0&scope=bot)
 
 
