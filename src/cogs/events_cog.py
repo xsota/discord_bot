@@ -26,9 +26,6 @@ class EventsCog(commands.Cog):
 
   @commands.Cog.listener()
   async def on_message(self, message):
-    if message.content.startswith('http') or message.content == '!!':
-      return
-
     yatte = re.match(r'(.*)やって$', message.content)
     if yatte:
       async with message.channel.typing():
