@@ -1,7 +1,9 @@
 import os
 import time
 import requests
+from logging import getLogger
 
+logger = getLogger(__name__)
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -55,6 +57,7 @@ def get_access_token():
 
 # IGDB APIからテーマの一覧を取得する関数
 def get_themes():
+  logger.info('Get Themes')
   url = "https://api.igdb.com/v4/themes"
   headers = {
     "Client-ID": CLIENT_ID,
@@ -71,6 +74,7 @@ def get_themes():
 
 # 複数のテーマIDを使用してIGDB APIからゲームを検索する関数
 def search_games_by_theme_ids(theme_ids):
+  logger.info('Search Games')
   url = "https://api.igdb.com/v4/games"
   headers = {
     "Client-ID": CLIENT_ID,
