@@ -22,7 +22,7 @@ functions = [
           "items": {
             "type": "integer"
           },
-          "description": "theme_id list",
+          "description": "theme_id list, e.g. [18, 43]",
         },
       },
       "required": ["theme_ids"],
@@ -64,6 +64,7 @@ def send_prompt(messages):
     # modelがfunctionの呼び出しを求めている
     if message.get("function_call"):
       function_name = message["function_call"]["name"]
+      arguments=json.loads(message["function_call"]["arguments"])
 
       # modelの求めるfunctionを呼ぶ
       match function_name:
@@ -74,7 +75,7 @@ def send_prompt(messages):
         case "search_games_by_theme_ids":
           print(message)
           function_response = str(search_games_by_theme_ids(
-            theme_ids=message.get("theme_ids"),
+            theme_ids=arguments.get("theme_ids"),
           ))
           print(function_response)
 
