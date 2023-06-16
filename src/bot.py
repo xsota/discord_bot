@@ -27,7 +27,6 @@ async def setup_hook():
   await bot.load_extension("cogs.proposal_cog")
   await bot.load_extension("cogs.price_cog")
   await bot.load_extension("cogs.events_cog")
-  await bot.load_extension("cogs.recommended_games_cog")
 
   # コマンド反映
   await bot.tree.sync()
