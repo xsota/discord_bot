@@ -1,10 +1,10 @@
 import os
 from datetime import datetime
+from typing import Dict
 
 import openai
 import json
-
-from igdb import search_games_by_theme_ids, get_themes
+from serpapi import GoogleSearch
 
 current_datetime = datetime.now()
 formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M")
@@ -12,29 +12,40 @@ formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M")
 # botに使ってほしいfunction
 functions = [
   {
-    "name": "search_games_by_theme_ids",
-    "description": "Search popular games by theme ID, ID: 20 - Thriller, ID: 18 - Science fiction, ID: 1 - Action, ID: 19 - Horror, ID: 21 - Survival, ID: 17 - Fantasy, ID: 22 - Historical, ID: 23 - Stealth, ID: 27 - Comedy, ID: 28 - Business, ID: 31 - Drama, ID: 32 - Non-fiction, ID: 35 - Kids, ID: 33 - Sandbox, ID: 38 - Open world, ID: 39 - Warfare, ID: 41 - 4X (explore, expand, exploit, and exterminate), ID: 34 - Educational, ID: 43 - Mystery, ID: 40 - Party, ID: 44 - Romance, ID: 42 - Erotic",
+    "name": "web_search",
+    "description": "If you need information that cannot be answered normally, search the web for information. Be sure to use this feature if the user's question contains words like 'search the web'",
     "parameters": {
       "type": "object",
       "properties": {
-        "theme_ids": {
-          "type": "array",
-          "items": {
-            "type": "integer"
-          },
-          "description": "theme_id list, e.g. [18, 43]",
+        "query": {
+          "type": "string",
+          "description": "Find information from users. Split by word to search for",
         },
       },
-      "required": ["theme_ids"],
+      "required": ["query"],
     },
   },
-  # {
-  #   "name": "get_themes",
-  #   "description": "Get IDs to use for search_games_by_theme_ids",
-  #   "parameters": {"type": "object", "properties": {}}
-  # },
 ]
 
+def web_search(query: str) -> Dict[str, str]:
+  search = GoogleSearch({
+    "engine": "yahoo",
+    "p": query,
+    "api_key": os.environ.get('SERP_API_KEY')
+  })
+  result = search.get_dict()
+  top3_result = result["organic_results"][:3]
+
+  res = {
+    "snippet":"",
+    "link":""
+  }
+
+  for i in top3_result:
+    res["snippet"] += i["snippet"] + ","
+    res["link"] += i["link"] + " "
+
+  return res
 
 def send_prompt(messages):
   if any(item.get("role") != "system" for item in messages):
@@ -68,16 +79,12 @@ def send_prompt(messages):
 
       # modelの求めるfunctionを呼ぶ
       match function_name:
-        case "get_themes":
-          print(message)
-          function_response = str(get_themes())
-          print(function_response)
-        case "search_games_by_theme_ids":
-          print(message)
-          function_response = str(search_games_by_theme_ids(
-            theme_ids=arguments.get("theme_ids"),
-          ))
-          print(function_response)
+        case "web_search":
+          function_response = web_search(
+            query=arguments.get("query"),
+          )
+          content = function_response["snippet"] + ' You can read more at: ' + function_response["link"]
+
 
       # modelに結果を送る
       second_response = openai.ChatCompletion.create(
@@ -85,7 +92,7 @@ def send_prompt(messages):
         messages=messages + [{
           "role": "function",
           "name": function_name,
-          "content": function_response,
+          "content": content,
         }]
       )
       message = second_response['choices'][0]['message']
