@@ -1,5 +1,5 @@
 requests
-aiohttp==3.8.4
+aiohttp==3.8.5
 async-timeout==4.0.2
 certifi==2023.7.22
 chardet==3.0.4
