@@ -19,6 +19,7 @@ class EventsCog(commands.Cog):
   @commands.Cog.listener()
   async def on_ready(self):
     logger.info('ログイン')
+    logger.info(self.bot.user.id)
     logger.info('Servers connected to:')
 
     for guild in self.bot.guilds:
@@ -37,10 +38,9 @@ class EventsCog(commands.Cog):
 
     # メッセージ履歴にメッセージを追加
     if message.author == self.bot.user:
-      self.add_message_to_history(message.channel.id, message.content, self.get_user_nickname(message.author),
-                                  role="assistant")
+      self.add_message_to_history(message,role="assistant")
     else:
-      self.add_message_to_history(message.channel.id, message.content, self.get_user_nickname(message.author))
+      self.add_message_to_history(message)
 
     if str(self.bot.user.id) in message.content:
       await self.reply_to(message)
@@ -70,8 +70,13 @@ class EventsCog(commands.Cog):
       async with channel.typing():
         await channel.send(f"{name}が{after.channel.name}に入ったよ")
 
-  def add_message_to_history(self, channel_id, content, name, role="user"):
-    text = self.remove_mentions(content)
+  def add_message_to_history(self, message, role="user"):
+    author_id = message.author.id
+    channel_id = message.channel.id
+    content = message.content
+    name = self.get_user_nickname(message.author)
+
+    text = content
 
     if text == '':
       return False
@@ -80,7 +85,7 @@ class EventsCog(commands.Cog):
       self.channel_message_history[channel_id] = []
 
     if role == "user":
-      self.channel_message_history[channel_id].append({"role": "user", "content": f'{name}: {text}'})
+      self.channel_message_history[channel_id].append({"role": "user", "content": f'{name}:{author_id} {text}'})
     elif role == "assistant":
       voice_state_update_pattern = re.compile(r'^.*が(.*)(からきえてく・・・|に入ったよ)$')
       if voice_state_update_pattern.match(content):
@@ -110,7 +115,7 @@ class EventsCog(commands.Cog):
     if gpt_messages is None:
       gpt_messages = self.channel_message_history[message.channel.id]
 
-    messages = send_prompt(gpt_messages)
+    messages = send_prompt(gpt_messages, self.bot.user.id)
 
     return messages
 

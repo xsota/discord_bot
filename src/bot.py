@@ -31,5 +31,4 @@ async def setup_hook():
   # コマンド反映
   await bot.tree.sync()
 
-
 bot.run(DISCORD_TOKEN)

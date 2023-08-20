@@ -47,12 +47,12 @@ def web_search(query: str) -> Dict[str, str]:
 
   return res
 
-def send_prompt(messages):
+def send_prompt(messages, uid):
   if any(item.get("role") != "system" for item in messages):
     messages = [{"role": "system", "content": os.environ.get('CHARACTER_PROMPT')},
-                {"role": "system", "content": "User comments are in the format Name: Comment"},
-                {"role": "system", "content": f"Current JST:{formatted_datetime}"},
-                {"role": "user", "content": "name: hi!"},
+                {"role": "system", "content": "User comments are in the format Name:UID: Comment"},
+                {"role": "system", "content": f"You are UID:{uid}"},
+                {"role": "user", "content": "name:257827101397352450: hi!"},
                 {"role": "assistant", "content": "こんにちは！"}
                 ] + messages
 
