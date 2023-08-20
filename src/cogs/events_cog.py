@@ -33,6 +33,10 @@ class EventsCog(commands.Cog):
     else:
       self.add_message_to_history(message)
 
+    # メッセージがbot自身からのものであれば、何もしない
+    if message.author.id == self.bot.user.id:
+      return
+
     if str(self.bot.user.id) in message.content:
       await self.reply_to(message)
       return
