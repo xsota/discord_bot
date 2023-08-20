@@ -27,15 +27,6 @@ class EventsCog(commands.Cog):
 
   @commands.Cog.listener()
   async def on_message(self, message):
-    yatte = re.match(r'(.*)やって$', message.content)
-    if yatte:
-      async with message.channel.typing():
-        play = yatte.group(1)
-        await self.bot.change_presence(activity=discord.Game(name=play))
-
-      await message.channel.send(f"{play}をプレイするよ")
-      return
-
     # メッセージ履歴にメッセージを追加
     if message.author == self.bot.user:
       self.add_message_to_history(message,role="assistant")
