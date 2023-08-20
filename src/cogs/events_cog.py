@@ -8,6 +8,16 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 
+def remove_mentions(text):
+  # 正規表現でメンション部分を削除
+  mention_pattern = r'<@!?[0-9]+>'
+  return re.sub(mention_pattern, '', text)
+
+
+def get_user_nickname(member):
+  return member.name if member.nick is None else member.nick
+
+
 class EventsCog(commands.Cog):
   MAX_HISTORY_LENGTH = 10
   RANDOM_REPLY_CHANCE = 36
@@ -56,7 +66,7 @@ class EventsCog(commands.Cog):
 
     server = before.channel.guild if after.channel is None else after.channel.guild
     channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
-    name = self.get_user_nickname(member)
+    name = get_user_nickname(member)
 
     if after.channel is None:
       async with channel.typing():
@@ -69,7 +79,7 @@ class EventsCog(commands.Cog):
     author_id = message.author.id
     channel_id = message.channel.id
     content = message.content
-    name = self.get_user_nickname(message.author)
+    name = get_user_nickname(message.author)
 
     text = content
 
@@ -98,14 +108,6 @@ class EventsCog(commands.Cog):
 
     return True
 
-  def remove_mentions(self, text):
-    # 正規表現でメンション部分を削除
-    mention_pattern = r'<@!?[0-9]+>'
-    return re.sub(mention_pattern, '', text)
-
-  def get_user_nickname(self, member):
-    return member.name if member.nick is None else member.nick
-
   def get_reply(self, message, gpt_messages=None):
     if gpt_messages is None:
       gpt_messages = self.channel_message_history[message.channel.id]
@@ -130,7 +132,7 @@ class EventsCog(commands.Cog):
       return m.reference is not None and m.reference.message_id == message.id
 
     msg = await self.bot.wait_for('message', timeout=180.0, check=check)
-    gpt_messages.append({"role": "user", "content": f"{self.get_user_nickname(msg.author)}「{msg.content}」"})
+    gpt_messages.append({"role": "user", "content": f"{get_user_nickname(msg.author)}「{msg.content}」"})
 
     await self.reply_to(msg, gpt_messages)
 
