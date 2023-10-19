@@ -70,10 +70,10 @@ class EventsCog(commands.Cog):
 
     if after.channel is None:
       async with channel.typing():
-        await channel.send(f'{name}が{before.channel.name}からきえてく・・・')
+        await channel.send(f'{name}が{before.channel.name}からきえてくにゃ・・・')
     else:
       async with channel.typing():
-        await channel.send(f"{name}が{after.channel.name}に入ったよ")
+        await channel.send(f"{name}が{after.channel.name}に入ったにゃ！")
 
   def add_message_to_history(self, message, role="user"):
     author_id = message.author.id
