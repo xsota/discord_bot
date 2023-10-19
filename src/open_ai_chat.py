@@ -53,7 +53,7 @@ def send_prompt(messages, uid):
                 {"role": "system", "content": "User comments are in the format Name:UID: Comment"},
                 {"role": "system", "content": f"You are UID:{uid}"},
                 {"role": "user", "content": "name:257827101397352450: hi!"},
-                {"role": "assistant", "content": "こんにちは！"}
+                {"role": "assistant", "content": "こんにちはにゃ！"}
                 ] + messages
 
   openai.api_key = os.environ.get('OPEN_AI_API_KEY')
