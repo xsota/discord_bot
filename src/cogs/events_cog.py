@@ -54,7 +54,7 @@ class EventsCog(commands.Cog):
     if random.randint(1, self.RANDOM_REPLY_CHANCE) == 1 and len(self.channel_message_history[message.channel.id]) > 2:
       async with message.channel.typing():
         messages = self.get_reply(message)
-        m = await message.channel.send(messages[-1]['content'])
+        m = await message.channel.send(messages[-1].content)
 
       await self.wait_reply(m, messages)
       return
@@ -83,11 +83,20 @@ class EventsCog(commands.Cog):
 
     text = content
 
-    if text == '':
-      return False
-
     if channel_id not in self.channel_message_history:
       self.channel_message_history[channel_id] = []
+
+    # メッセージに添付ファイルがあるかチェック
+    if message.attachments:
+      for attachment in message.attachments:
+        if 'image' in attachment.content_type:
+          self.channel_message_history[channel_id].append({"role": "user", "content": [
+            {"type":"text", "text": f'{name}:{author_id} {text}'},
+            {"type":"image_url", "image_url":attachment.url}
+          ]})
+
+    if text == '':
+      return False
 
     if role == "user":
       self.channel_message_history[channel_id].append({"role": "user", "content": f'{name}:{author_id} {text}'})
@@ -123,7 +132,7 @@ class EventsCog(commands.Cog):
     async with message.channel.typing():
       messages = self.get_reply(message, gpt_messages)
 
-    reply_message = await message.reply(messages[-1]['content'])
+    reply_message = await message.reply(messages[-1].content)
 
     await self.wait_reply(reply_message, messages)
 
