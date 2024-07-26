@@ -90,13 +90,17 @@ class EventsCog(commands.Cog):
     if message.attachments:
       for attachment in message.attachments:
         if 'image' in attachment.content_type:
-          self.channel_message_history[channel_id].append({"role": "user", "content": [
-            {"type":"text", "text": f'{name}:{author_id} {text}'},
-            {"type":"image_url", "image_url":attachment.url}
-          ]})
+          self.channel_message_history[channel_id].append({
+            "role": role,
+            "content": [
+              {"type": "text", "text": f'{name}:{author_id} {text}'},
+              {"type": "image_url", "image_url": {"url": attachment.url}}
+            ]
+          })
 
     if text == '':
       return False
+
 
     if role == "user":
       self.channel_message_history[channel_id].append({"role": "user", "content": f'{name}:{author_id} {text}'})
