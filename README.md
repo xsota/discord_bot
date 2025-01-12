@@ -9,11 +9,6 @@
 ![image](https://github.com/xsota/discord_bot/assets/5690642/4543f503-045a-46c8-9d69-1d5bf3bc557a)
 
 
-
-## yukariちゃんとDiscordで喋ってみたい人
-yukariちゃんを[Discordに招待する](https://discordapp.com/api/oauth2/authorize?client_id=551785476584112139&permissions=0&scope=bot)
-
-
 ## ChatGPTを使ったDiscord botを自分の環境とかで動かしたい人
 - git cloneする
 - とりあえずbot.pyが動くように例えばpip installとかする

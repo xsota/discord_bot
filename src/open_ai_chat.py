@@ -59,18 +59,17 @@ def send_prompt(messages, uid):
                 ] + messages
 
   client = OpenAI(
-    api_key = os.environ.get('OPEN_AI_API_KEY')
+    api_key = os.environ.get('OPEN_AI_API_KEY'),
+    base_url = os.environ.get('OPEN_AI_API_URL')
   )
 
   try:
     response = client.chat.completions.create(
-      model="gpt-4o",
-      # model="gpt-3.5-turbo",
-      # model="gpt-4-0613",
+      model=os.environ.get('OPEN_AI_MODEL'),
       messages=messages,
       #functions=functions,
       #function_call="auto",
-      max_tokens=300,
+      max_tokens=int(os.environ.get('OPEN_AI_MAX_TOKEN')),
       timeout=30,
     )
 
