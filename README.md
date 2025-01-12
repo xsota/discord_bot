@@ -29,3 +29,8 @@ python src/bot.py
 ```
 fly deploy
 ```
+
+# update requirements.txt
+```
+venv/bin/pipreqs --force src
+```
