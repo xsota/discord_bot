@@ -1,14 +1,17 @@
 import os
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+
 from datetime import datetime
 from typing import Dict
-
-from openai import OpenAI
 
 import json
 from serpapi import GoogleSearch
 
 current_datetime = datetime.now()
 formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M")
+
+character_prompt = os.environ.get('CHARACTER_PROMPT')
 
 # botに使ってほしいfunction
 functions = [
@@ -51,30 +54,26 @@ def web_search(query: str) -> Dict[str, str]:
 def send_prompt(messages, uid):
 
   if any(item.get("role") != "system" for item in messages):
-    messages = [{"role": "system", "content": os.environ.get('CHARACTER_PROMPT')},
-                {"role": "system", "content": "User comments are in the format Name:UID: Comment"},
-                {"role": "system", "content": f"You are UID:{uid}"},
-                {"role": "user", "content": "name:257827101397352450: hi!"},
-                {"role": "assistant", "content": "<@257827101397352450> hi！"}
+    messages = [SystemMessage(character_prompt),
+                SystemMessage("User comments are in the format Name:UID: Comment"),
+                SystemMessage(f"You are UID:{uid}"),
+                HumanMessage("name:257827101397352450: hi!"),
+                AIMessage("<@257827101397352450> hi！")
                 ] + messages
 
-  client = OpenAI(
-    api_key = os.environ.get('OPEN_AI_API_KEY'),
-    base_url = os.environ.get('OPEN_AI_API_URL')
+  model = ChatOpenAI(
+    model=os.environ.get('OPEN_AI_MODEL'),
+    openai_api_key=os.environ.get('OPEN_AI_API_KEY'),
+    openai_api_base=os.environ.get('OPEN_AI_API_URL'),
+    max_tokens=int(os.environ.get('OPEN_AI_MAX_TOKEN')),
+    temperature=float(os.environ.get('TEMPERATURE', 1))
   )
 
-  try:
-    response = client.chat.completions.create(
-      model=os.environ.get('OPEN_AI_MODEL'),
-      messages=messages,
-      #functions=functions,
-      #function_call="auto",
-      max_tokens=int(os.environ.get('OPEN_AI_MAX_TOKEN')),
-      timeout=30,
-    )
 
-    #message = response['choices'][0]['message']
-    message = response.choices[0].message
+  try:
+    response = model.invoke(messages)
+
+    message = response
     messages.append(message)
 
     # modelがfunctionの呼び出しを求めている
