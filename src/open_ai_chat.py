@@ -55,7 +55,7 @@ def send_prompt(messages, uid):
                 {"role": "system", "content": "User comments are in the format Name:UID: Comment"},
                 {"role": "system", "content": f"You are UID:{uid}"},
                 {"role": "user", "content": "name:257827101397352450: hi!"},
-                {"role": "assistant", "content": "こんにちはにゃ！"}
+                {"role": "assistant", "content": "<@257827101397352450> hi！"}
                 ] + messages
 
   client = OpenAI(
