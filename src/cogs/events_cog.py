@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 import re
-from open_ai_chat import send_prompt
 import random
 from logging import getLogger
 
@@ -125,9 +124,15 @@ class EventsCog(commands.Cog):
     if gpt_messages is None:
       gpt_messages = self.channel_message_history[message.channel.id]
 
-    messages = send_prompt(gpt_messages, self.bot.user.id)
+    # run agent
+    final_state = self.bot.meowgent.app.invoke(
+      {"messages": gpt_messages},
+      config={"configurable": {"thread_id": message.channel.id, "recursion_limit": 5}}
+    )
+    message = final_state['messages'][-1]
+    gpt_messages.append(message)
 
-    return messages
+    return gpt_messages
 
   async def reply_to(self, message, gpt_messages=None):
     if gpt_messages is None:
