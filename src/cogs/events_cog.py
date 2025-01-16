@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 import re
@@ -48,8 +50,13 @@ class EventsCog(commands.Cog):
       return
 
     if str(self.bot.user.id) in message.content:
-      await self.reply_to(message)
-      return
+      if message.author.bot:  # 相手がbotの場合
+        if random.randint(1, self.RANDOM_REPLY_CHANCE) == 1 and len(self.channel_message_history[message.channel.id]) > 2:
+          await self.reply_to(message)  # ランダムに返信
+        return
+      else:  # 相手が人間の場合は必ず返信
+        await self.reply_to(message)
+        return
 
     if random.randint(1, self.RANDOM_REPLY_CHANCE) == 1 and len(self.channel_message_history[message.channel.id]) > 2:
       async with message.channel.typing():
@@ -142,12 +149,27 @@ class EventsCog(commands.Cog):
 
   async def wait_reply(self, message, gpt_messages):
     def check(m):
-      return m.reference is not None and m.reference.message_id == message.id
+      return (
+        m.reference is not None
+        and m.reference.message_id == message.id
+      )
 
-    msg = await self.bot.wait_for('message', timeout=180.0, check=check)
-    gpt_messages.append({"role": "user", "content": f"{get_user_nickname(msg.author)}「{msg.content}」"})
+    try:
+      msg = await self.bot.wait_for('message', timeout=180.0, check=check)
 
-    await self.reply_to(msg, gpt_messages)
+      # メッセージがbotから送信された場合
+      if msg.author.bot:
+        if random.randint(1, self.RANDOM_REPLY_CHANCE) == 1:  # ランダム返信
+          gpt_messages.append({"role": "user", "content": f"{get_user_nickname(msg.author)}「{msg.content}」"})
+          await self.reply_to(msg, gpt_messages)
+      else:
+        # 人間から送信された場合、通常の処理
+        gpt_messages.append({"role": "user", "content": f"{get_user_nickname(msg.author)}「{msg.content}」"})
+        await self.reply_to(msg, gpt_messages)
+
+    except asyncio.TimeoutError:
+      # メッセージが一定時間内に返信されなかった場合
+      pass
 
 
 async def setup(bot: commands.Bot):
