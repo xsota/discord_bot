@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import discord
 from discord.ext import commands
@@ -26,6 +27,11 @@ class EventsCog(commands.Cog):
 
   def __init__(self, bot):
     self.bot = bot
+    self.voice_notification_enabled = os.getenv('VOICE_NOTIFICATION_ENABLED', 'false').lower() == 'true'
+    self.leave_message = os.getenv('VOICE_LEAVE_MESSAGE', '{name}が{channel}からきえてくにゃ・・・')
+    self.join_message = os.getenv('VOICE_JOIN_MESSAGE', '{name}が{channel}に入ったにゃ！')
+    self.notification_channel_name = os.getenv('VOICE_NOTIFICATION_CHANNEL', 'general')  # 通知先チャンネル名
+
 
   @commands.Cog.listener()
   async def on_ready(self):
@@ -67,19 +73,32 @@ class EventsCog(commands.Cog):
 
   @commands.Cog.listener()
   async def on_voice_state_update(self, member, before, after):
+    # 通知機能が無効の場合は何もしない
+    if not self.voice_notification_enabled:
+      return
+
+    # 入退室判定
     if before.channel == after.channel:
       return
 
+    # 通知先のテキストチャンネル取得
     server = before.channel.guild if after.channel is None else after.channel.guild
-    channel = discord.utils.get(server.channels, name='general', type=discord.ChannelType.text)
+    channel = discord.utils.get(server.channels, name=self.notification_channel_name, type=discord.ChannelType.text)
+
+    if channel is None:
+      logger.warning(f"Notification channel '{self.notification_channel_name}' not found in server '{server.name}'.")
+      return
+
     name = get_user_nickname(member)
 
+    # 入退室メッセージ送信
     if after.channel is None:
-      async with channel.typing():
-        await channel.send(f'{name}が{before.channel.name}からきえてくにゃ・・・')
+      message = self.leave_message.format(name=name, channel=before.channel.name)
     else:
-      async with channel.typing():
-        await channel.send(f"{name}が{after.channel.name}に入ったにゃ！")
+      message = self.join_message.format(name=name, channel=after.channel.name)
+
+    async with channel.typing():
+      await channel.send(message)
 
   def add_message_to_history(self, message, role="user"):
     author_id = message.author.id
