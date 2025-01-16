@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import discord
 from discord.ext import commands
@@ -27,6 +28,8 @@ class EventsCog(commands.Cog):
 
   def __init__(self, bot):
     self.bot = bot
+    self.voice_notification_enabled = os.getenv('VOICE_NOTIFICATION_ENABLED', 'false').lower() == 'true'
+
 
   @commands.Cog.listener()
   async def on_ready(self):
@@ -68,6 +71,10 @@ class EventsCog(commands.Cog):
 
   @commands.Cog.listener()
   async def on_voice_state_update(self, member, before, after):
+    # 通知機能が無効の場合は何もしない
+    if not self.voice_notification_enabled:
+      return
+
     if before.channel == after.channel:
       return
 
