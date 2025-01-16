@@ -1,9 +1,8 @@
 import os
+from logging import basicConfig, getLogger, INFO
 
 import discord
 from discord.ext import commands
-from logging import basicConfig, getLogger, INFO
-
 from langchain_openai import ChatOpenAI
 
 from tools.web_search import web_search
@@ -51,6 +50,23 @@ async def setup_hook():
     tools=tools,
     system_prompt=character_prompt
   )
+
+  async def on_stamina_change(stamina: int, max_stamina: int):
+    """スタミナ変更時に呼び出される処理"""
+    logger.info(f"[EventsCog] Meowgent's stamina updated: {stamina}")
+    # botのステータスをスタミナに変更
+    # Botのステータスを更新
+    activity = discord.Game(name=render_stamina_bar(stamina, max_stamina, 10))
+    await bot.change_presence(activity=activity)
+
+  def render_stamina_bar(current: int, max_stamina: int, bar_length: int = 20) -> str:
+    filled_length = int(bar_length * current / max_stamina)
+    bar = "█" * filled_length + "-" * (bar_length - filled_length)
+    return f"[{bar}]"
+
+  bot.meowgent.add_stamina_listener(on_stamina_change)
+  bot.meowgent.start_stamina_recovery(interval=360, recovery_amount=1) # 8時間で80くらい回復してほしい
+
   logger.info("Meowgent instance has been initialized.")
 
   # Cogロード

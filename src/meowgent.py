@@ -1,4 +1,5 @@
-from typing import Literal
+import asyncio
+from typing import Literal, Callable, List
 
 from langchain_core.messages import SystemMessage
 from langgraph.graph import END, START, StateGraph, MessagesState
@@ -13,6 +14,10 @@ class Meowgent:
     self.model = model
     self.tools = tools
     self.checkpointer = checkpointer
+    self.max_stamina = 100
+    self.stamina = self.max_stamina
+    self._stamina_updated_listeners: List[Callable[[int, int], None]] = []  # スタミナ変更リスナー
+    self._stamina_recovery_task = None  # スタミナ回復用のタスク
 
     # 新しいグラフを定義
     workflow = StateGraph(MessagesState)
@@ -41,18 +46,19 @@ class Meowgent:
 
 
   # 処理を継続するかどうかを決定する
-  def should_continue(self, state: MessagesState) -> Literal["tools", END]:
+  async def should_continue(self, state: MessagesState) -> Literal["tools", END]:
     messages = state['messages']
     last_message = messages[-1]
     logger.info(f"[should_continue] The last message: {last_message.content}")
     if last_message.tool_calls:
       logger.info("[should_continue] A tool call has been detected. Next node: tools")
+      await self.reduce_stamina(5) # スタミナ使う
       return "tools"
     logger.info("[should_continue] No tool call detected. Next node: END")
     return END
 
   # モデルを呼び出す関数
-  def call_model(self, state: MessagesState):
+  async def call_model(self, state: MessagesState):
     system_message = SystemMessage(content=self.system_prompt)
 
     messages = [system_message] + state['messages']
@@ -60,4 +66,52 @@ class Meowgent:
     response = self.model.invoke(messages)
     logger.info(f"[call_model] Response from the model: {response}")
 
+    await self.reduce_stamina(5) # スタミナ使う
     return {"messages": [response]}
+
+  def add_stamina_listener(self, listener: Callable[[int, int], None]):
+    """スタミナ変更時に呼び出されるリスナーを追加"""
+    self._stamina_updated_listeners.append(listener)
+
+  async def _notify_stamina_change(self):
+    """スタミナ変更時にリスナーを通知"""
+    for listener in self._stamina_updated_listeners:
+      if asyncio.iscoroutinefunction(listener):
+        # リスナーが非同期関数の場合
+        #loop = asyncio.get_running_loop()
+        # asyncio.run_coroutine_threadsafe(listener(self.stamina, self.max_stamina), loop)
+        await listener(self.stamina, self.max_stamina)
+      else:
+        # リスナーが同期関数の場合
+        listener(self.stamina, self.max_stamina)
+
+  async def reduce_stamina(self, amount):
+    self.stamina = max(0, self.stamina - amount)
+    logger.info(f"Stamina reduced by {amount}. Current stamina: {self.stamina}")
+    await self._notify_stamina_change()
+
+  async def recover_stamina(self, amount):
+    self.stamina = min(100, self.stamina + amount)
+    # logger.info(f"Stamina recovered by {amount}. Current stamina: {self.stamina}")
+    await self._notify_stamina_change()
+
+  def start_stamina_recovery(self, interval: int = 10, recovery_amount: int = 1):
+    """スタミナを時間経過で回復させるタスクを開始"""
+    if self._stamina_recovery_task is None:
+      self._stamina_recovery_task = asyncio.create_task(
+        self._recover_stamina_periodically(interval, recovery_amount)
+      )
+      logger.info("Stamina recovery task started.")
+
+  def stop_stamina_recovery(self):
+    """スタミナ回復タスクを停止"""
+    if self._stamina_recovery_task:
+      self._stamina_recovery_task.cancel()
+      self._stamina_recovery_task = None
+      logger.info("Stamina recovery task stopped.")
+
+  async def _recover_stamina_periodically(self, interval: int, recovery_amount: int):
+    """スタミナを一定間隔で回復"""
+    while True:
+      await asyncio.sleep(interval)
+      await self.recover_stamina(recovery_amount)
