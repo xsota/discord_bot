@@ -22,6 +22,7 @@ python src/bot.py
 ```
 
 ## とりあえずChatGPTを使ったおれおれDiscord botが欲しい人
+- https://discord.com/developers/applications Discord Tokenを取得する
 - git cloneする
 - fly.ioのアカウントを作ったりする
 - flyctlをインストールしたりする (https://fly.io/docs/hands-on/install-flyctl/)
