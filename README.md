@@ -62,3 +62,5 @@ venv/bin/pipreqs --force src
 ## Contributing
 Contributions are welcome! Feel free to submit issues or pull requests. Please ensure all new features are well-documented and tested.
 
+For detailed guidelines on how to contribute, please refer to the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
+
