@@ -2,10 +2,13 @@ import asyncio
 from typing import Literal, Callable, List
 
 from langchain_core.messages import SystemMessage
-from langgraph.graph import END, START, StateGraph, MessagesState
+from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 
 from logging import getLogger
+
+from discord_messages_state import DiscordMessagesState
+
 logger = getLogger(__name__)
 
 class Meowgent:
@@ -20,7 +23,7 @@ class Meowgent:
     self._stamina_recovery_task = None  # スタミナ回復用のタスク
 
     # 新しいグラフを定義
-    workflow = StateGraph(MessagesState)
+    workflow = StateGraph(DiscordMessagesState)
     logger.info("The graph has been initialized.")
     workflow.add_node("agent", self.call_model)
 
@@ -46,7 +49,7 @@ class Meowgent:
 
 
   # 処理を継続するかどうかを決定する
-  async def should_continue(self, state: MessagesState) -> Literal["tools", END]:
+  async def should_continue(self, state: DiscordMessagesState) -> Literal["tools", END]:
     messages = state['messages']
     last_message = messages[-1]
     logger.info(f"[should_continue] The last message: {last_message.content}")
@@ -58,10 +61,12 @@ class Meowgent:
     return END
 
   # モデルを呼び出す関数
-  async def call_model(self, state: MessagesState):
-    system_message = SystemMessage(content=self.system_prompt)
+  async def call_model(self, state: DiscordMessagesState):
+    channel_id = state['current_channel_id']
+    system_prompt = SystemMessage(content=self.system_prompt)
+    channel_id_prompt = SystemMessage(content=f"current_channel_id: {channel_id}")
 
-    messages = [system_message] + state['messages']
+    messages = [system_prompt, channel_id_prompt] + state['messages']
     logger.info(f"[call_model] Messages passed to the model: {[msg.content for msg in messages]}")
     response = self.model.invoke(messages)
     logger.info(f"[call_model] Response from the model: {response}")

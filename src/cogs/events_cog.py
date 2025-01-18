@@ -152,7 +152,11 @@ class EventsCog(commands.Cog):
 
     # run agent
     final_state = await self.bot.meowgent.app.ainvoke(
-      {"messages": gpt_messages},
+      {
+        "messages": gpt_messages,
+        "current_channel_id": message.channel.id,
+      },
+
       config={"configurable": {"thread_id": message.channel.id, "recursion_limit": 5}}
     )
     message = final_state['messages'][-1]
