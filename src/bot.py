@@ -1,10 +1,16 @@
+import datetime
 import os
+from datetime import datetime, timedelta
 from logging import basicConfig, getLogger, INFO
 
 import discord
 from discord.ext import commands
+from langchain_core.messages import SystemMessage
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 
+from tools.get_current_time import get_current_time
+from tools.task_manager import TaskManager
 from tools.web_search import web_search
 
 basicConfig(level=INFO)
@@ -24,9 +30,10 @@ bot.meowgent = None
 
 appId = None
 
-
 @bot.event
-async def setup_hook():
+async def on_ready():
+  logger.info(f"Bot is ready. Logged in as {bot.user}")
+
   from meowgent import Meowgent
 
   # load llm
@@ -38,8 +45,53 @@ async def setup_hook():
     temperature=float(os.environ.get('TEMPERATURE', 1))
   )
 
+  # Task Manager
+  task_manager = TaskManager()
+  async def task(channel_id: int, prompt: str):
+    try:
+      final_state = await bot.meowgent.app.ainvoke(
+        {
+          "messages": [SystemMessage(content=prompt)],
+          "current_channel_id": channel_id
+        },
+
+        config={"configurable": {"thread_id": channel_id, "recursion_limit": 5}}
+      )
+      message = final_state['messages'][-1]
+      await bot.get_channel(channel_id).send(f"{message.content}")
+    except Exception as e:
+      logger.error(f"error: {e}")
+
+  @tool
+  def create_task(channel_id: int, prompt: str, minutes_later: int):
+    """
+    Schedule a new task to run after a specified time.
+
+    Args:
+        channel_id (int): Discord channel ID where the task will run.
+        prompt (str): Content to execute as the task after the specified delay.
+        minutes_later (int): Minutes from now when the task will execute.
+
+    Example:
+        create_task(1234567890, "Check server status", 10)  # Executes 10 minutes later
+    """
+
+    try:
+      # 現在時刻から指定された分だけ後の時刻を計算
+      scheduled_time = datetime.now() + timedelta(minutes=minutes_later)
+
+      # タスクをスケジュール
+      task_manager.add_task(task, scheduled_time, [channel_id, prompt])
+      return f"Successfully scheduled.: {scheduled_time.isoformat()}."
+    except Exception as e:
+      return f"Error: {str(e)}"
+
   # tools settings
-  tools = [web_search]
+  tools = [
+    web_search,
+    create_task,
+    get_current_time,
+  ]
 
   # character settings
   character_prompt = os.environ.get('CHARACTER_PROMPT')
@@ -69,6 +121,11 @@ async def setup_hook():
 
   logger.info("Meowgent instance has been initialized.")
 
+  task_manager.start_scheduler()
+
+
+@bot.event
+async def setup_hook():
   # Cogロード
   await bot.load_extension("cogs.chart_cog")
   await bot.load_extension("cogs.proposal_cog")
