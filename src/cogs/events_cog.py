@@ -4,7 +4,6 @@ import os
 import discord
 from discord.ext import commands
 import re
-from open_ai_chat import send_prompt
 import random
 from logging import getLogger
 
@@ -66,7 +65,7 @@ class EventsCog(commands.Cog):
 
     if random.randint(1, self.RANDOM_REPLY_CHANCE) == 1 and len(self.channel_message_history[message.channel.id]) > 2:
       async with message.channel.typing():
-        messages = self.get_reply(message)
+        messages = await self.get_reply(message)
         m = await message.channel.send(messages[-1].content)
 
       await self.wait_reply(m, messages)
@@ -147,20 +146,30 @@ class EventsCog(commands.Cog):
 
     return True
 
-  def get_reply(self, message, gpt_messages=None):
+  async def get_reply(self, message, gpt_messages=None):
     if gpt_messages is None:
       gpt_messages = self.channel_message_history[message.channel.id]
 
-    messages = send_prompt(gpt_messages, self.bot.user.id)
+    # run agent
+    final_state = await self.bot.meowgent.app.ainvoke(
+      {
+        "messages": gpt_messages,
+        "current_channel_id": message.channel.id,
+      },
 
-    return messages
+      config={"configurable": {"thread_id": message.channel.id, "recursion_limit": 5}}
+    )
+    message = final_state['messages'][-1]
+    gpt_messages.append(message)
+
+    return gpt_messages
 
   async def reply_to(self, message, gpt_messages=None):
     if gpt_messages is None:
       gpt_messages = self.channel_message_history[message.channel.id]
 
     async with message.channel.typing():
-      messages = self.get_reply(message, gpt_messages)
+      messages = await self.get_reply(message, gpt_messages)
 
     reply_message = await message.reply(messages[-1].content)
 
